@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#0a0a0a] text-[#ededed] antialiased;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-image: linear-gradient(to right, #171717 1px, transparent 1px),
+      linear-gradient(to bottom, #171717 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Outfit', sans-serif;
+  }
+}
+
+.bento-card {
+  @apply bg-[#111111] border border-[#262626] rounded-2xl transition-all duration-300 hover:border-[#404040];
+}
+
+.btn-primary {
+  @apply bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-colors;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-[#0a0a0a];
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-[#262626] rounded-full hover:bg-[#404040];
+}
