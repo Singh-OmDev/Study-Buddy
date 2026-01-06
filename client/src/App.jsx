@@ -8,23 +8,26 @@ import StudyLogger from './pages/StudyLogger';
 import AIRevision from './pages/AIRevision';
 import CalendarView from './pages/CalendarView';
 import AIStudyChat from './pages/AIStudyChat';
+import Landing from './pages/Landing';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-zinc-500">Loading...</div>;
   return user ? children : <Navigate to="/login" />;
 };
 
 function AppRoutes() {
   return (
-    <div className="min-h-screen pb-10">
+    <div className="min-h-screen bg-[#0a0a0a] pb-10">
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Routes>
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+
           <Route
-            path="/"
+            path="/dashboard"
             element={
               <PrivateRoute>
                 <Dashboard />

@@ -15,7 +15,7 @@ A full-stack, AI-powered study assistant designed to optimize learning retention
 ### 📅 Smart Scheduling & Analytics
 - **Visual Calendar**: Track consistency with a GitHub-style interactive calendar beat map.
 - **Confidence-Based Revision**: Automatically calculates optimal revision dates based on your self-reported confidence (Spaced Repetition logic).
-- **Pro Dashboard**: Beautiful, data-rich analytics using Recharts and Glassmorphism UI.
+- **Pro Dashboard**: Beautiful, data-rich analytics with a modern "Bento Grid" dark-mode aesthetic.
 
 ### ⚡ User Experience
 - **Wizard-Style Logger**: Frictionless, step-by-step logging flow to reduce cognitive load.
