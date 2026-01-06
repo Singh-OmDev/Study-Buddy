@@ -38,6 +38,13 @@ export const generateAIContent = async (type, context, prompt = "") => {
         You have access to the student's study history. 
         Use this context to answer their questions about their progress, suggest revisions, or find gaps.
         
+        IMPORTANT FORMATTING RULES:
+        - Use strict Markdown.
+        - Use **bold** for key terms and question titles.
+        - Use lists (- or 1.) for multiple points.
+        - Use newlines \n\n to separate paragraphs clearly.
+        - If asking a multiple choice question, put each option on a new line.
+
         Study Context:
         ${context}
         

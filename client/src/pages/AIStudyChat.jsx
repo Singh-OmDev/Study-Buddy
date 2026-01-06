@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { Send, User, Bot, Sparkles, Terminal } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useAuth } from '../context/AuthContext';
 
 const AIStudyChat = () => {
@@ -73,8 +75,8 @@ const AIStudyChat = () => {
 
                             {/* Avatar */}
                             <div className={`flex-shrink-0 h-8 w-8 rounded flex items-center justify-center mt-1 border ${msg.role === 'user'
-                                    ? 'bg-white border-white'
-                                    : 'bg-[#1a1a1a] border-[#262626]'
+                                ? 'bg-white border-white'
+                                : 'bg-[#1a1a1a] border-[#262626]'
                                 }`}>
                                 {msg.role === 'user'
                                     ? <User className="h-5 w-5 text-black" />
@@ -84,10 +86,31 @@ const AIStudyChat = () => {
 
                             {/* Bubble */}
                             <div className={`p-4 rounded-lg text-sm leading-relaxed font-sans ${msg.role === 'user'
-                                    ? 'bg-[#1a1a1a] text-white border border-[#262626]'
-                                    : 'text-zinc-300'
+                                ? 'bg-[#1a1a1a] text-white border border-[#262626]'
+                                : 'text-zinc-300'
                                 }`}>
-                                {msg.content}
+                                {msg.role === 'user' ? (
+                                    msg.content
+                                ) : (
+                                    <ReactMarkdown
+                                        children={msg.content}
+                                        remarkPlugins={[remarkGfm]}
+                                        components={{
+                                            strong: ({ node, ...props }) => <span className="font-bold text-white" {...props} />,
+                                            ul: ({ node, ...props }) => <ul className="list-disc ml-4 space-y-1 my-2" {...props} />,
+                                            ol: ({ node, ...props }) => <ol className="list-decimal ml-4 space-y-1 my-2" {...props} />,
+                                            li: ({ node, ...props }) => <li className="pl-1" {...props} />,
+                                            p: ({ node, ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                                            code: ({ node, inline, className, children, ...props }) => {
+                                                return inline ? (
+                                                    <code className="bg-[#1a1a1a] px-1 py-0.5 rounded text-xs font-mono border border-[#333]" {...props}>{children}</code>
+                                                ) : (
+                                                    <code className="block bg-[#1a1a1a] p-3 rounded-lg text-xs font-mono border border-[#333] my-2 overflow-x-auto" {...props}>{children}</code>
+                                                );
+                                            }
+                                        }}
+                                    />
+                                )}
                             </div>
                         </div>
                     </div>
