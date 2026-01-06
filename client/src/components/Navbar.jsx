@@ -65,9 +65,9 @@ const NavLink = ({ to, text }) => {
     return (
         <Link
             to={to}
-            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${isActive
-                ? 'text-white bg-[#1a1a1a]'
-                : 'text-zinc-500 hover:text-zinc-300 hover:bg-[#111111]'
+            className={`relative px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-300 ${isActive
+                    ? 'text-white bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.07)] border border-white/5'
+                    : 'text-zinc-400 hover:text-white hover:bg-white/5'
                 }`}
         >
             {text}

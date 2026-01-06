@@ -24,7 +24,11 @@
 }
 
 .bento-card {
-  @apply bg-[#111111] border border-[#262626] rounded-2xl transition-all duration-300 hover:border-[#404040];
+  @apply bg-[#111111] border border-[#262626] rounded-2xl transition-all duration-300 hover:border-[#525252];
+}
+
+.bento-card:hover {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.02);
 }
 
 .btn-primary {

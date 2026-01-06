@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, Brain, Calendar, BarChart2, Zap, Terminal } from 'lucide-react';
+import { ArrowRight, BookOpen, Brain, Calendar, BarChart2, Zap, Terminal, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 
@@ -121,20 +121,27 @@ const Landing = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <h2 className="text-3xl font-bold text-white mb-12 text-center">Workflow</h2>
 
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         {[
                             { step: '01', title: 'Log Session', desc: 'Enter subject, topic, and duration.', icon: BookOpen },
                             { step: '02', title: 'AI Analysis', desc: 'Auto-summarize notes & confidence.', icon: Sparkles },
                             { step: '03', title: 'Track Data', desc: 'View analytics & streaks.', icon: BarChart2 },
                             { step: '04', title: 'Review', desc: 'Chat with history to revise.', icon: Brain },
                         ].map((item, idx) => (
-                            <div key={idx} className="relative">
-                                <span className="text-6xl font-bold text-[#1a1a1a] absolute -top-4 -left-2 z-0">{item.step}</span>
-                                <div className="relative z-10 pt-8">
-                                    <h3 className="text-white font-bold text-lg mb-2 flex items-center gap-2">
+                            <div key={idx} className="bento-card p-6 relative group hover:bg-[#151515] transition-colors">
+                                <div className="absolute top-4 right-4 text-4xl font-bold text-[#1f1f1f] group-hover:text-[#2a2a2a] transition-colors select-none font-mono">
+                                    {item.step}
+                                </div>
+                                <div className="relative z-10">
+                                    <div className="w-10 h-10 bg-[#1a1a1a] rounded-lg flex items-center justify-center mb-4 border border-[#262626] group-hover:border-zinc-700 transition-colors">
+                                        <item.icon className="h-5 w-5 text-zinc-300 group-hover:text-white transition-colors" />
+                                    </div>
+                                    <h3 className="text-white font-bold text-lg mb-2">
                                         {item.title}
                                     </h3>
-                                    <p className="text-zinc-500 text-sm leading-relaxed">{item.desc}</p>
+                                    <p className="text-zinc-500 text-sm leading-relaxed max-w-[90%]">
+                                        {item.desc}
+                                    </p>
                                 </div>
                             </div>
                         ))}
@@ -151,8 +158,5 @@ const Landing = () => {
         </div>
     );
 };
-
-// Icon helper since I used it in map
-import { Sparkles } from 'lucide-react';
 
 export default Landing;
