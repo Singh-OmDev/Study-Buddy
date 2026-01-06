@@ -1,12 +1,26 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Clock, Book, CheckCircle, TrendingUp, Zap, ArrowUpRight } from 'lucide-react';
+import { Clock, Book, CheckCircle, TrendingUp, Zap, ArrowUpRight, Quote } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
+import ReportCardModal from '../components/ReportCardModal';
+
+const QUOTES = [
+    "The secret of getting ahead is getting started.",
+    "It always seems impossible until it's done.",
+    "Don't watch the clock; do what it does. Keep going.",
+    "The future depends on what you do today.",
+    "Believe you can and you're halfway there.",
+    "Success is the sum of small efforts, repeated day in and day out."
+];
 
 const Dashboard = () => {
+    const { user } = useAuth();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isReportOpen, setIsReportOpen] = useState(false);
+    const dailyQuote = useMemo(() => QUOTES[new Date().getDate() % QUOTES.length], []);
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -34,6 +48,8 @@ const Dashboard = () => {
         minutes: value
     })) : [];
 
+
+
     return (
         <div className="space-y-6 animate-in fade-in duration-700">
             {/* Minimal Header */}
@@ -42,9 +58,14 @@ const Dashboard = () => {
                     <h1 className="text-4xl font-bold text-white tracking-tight mb-1">Dashboard</h1>
                     <p className="text-zinc-500">Overview of your learning progress.</p>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-[#111111] border border-[#262626] rounded-full">
-                    <Zap className="h-4 w-4 text-orange-500 fill-orange-500" />
-                    <span className="text-sm font-medium text-zinc-300">Streak: <span className="text-white">3 Days</span></span>
+                <div className="flex items-center gap-3">
+                    <button onClick={() => setIsReportOpen(true)} className="px-3 py-2 bg-white text-black text-xs font-bold rounded-full hover:bg-zinc-200 transition-colors">
+                        Get Report Card
+                    </button>
+                    <div className="flex items-center gap-2 px-4 py-2 bg-[#111111] border border-[#262626] rounded-full">
+                        <Zap className="h-4 w-4 text-orange-500 fill-orange-500" />
+                        <span className="text-sm font-medium text-zinc-300">Streak: <span className="text-white">{stats?.streak || 0} Days</span></span>
+                    </div>
                 </div>
             </header>
 
@@ -58,13 +79,18 @@ const Dashboard = () => {
                     className="md:col-span-2 bento-card p-8 flex flex-col justify-between relative overflow-hidden group"
                 >
                     <div className="relative z-10">
-                        <h2 className="text-2xl font-semibold mb-2 text-white">Keep it up!</h2>
-                        <p className="text-zinc-400 max-w-md text-sm leading-relaxed">
-                            "Consistency transforms average into excellence." You've accumulated <span className="text-white font-medium">{stats?.totalHours || 0} hours</span> of focused study time.
-                        </p>
-                    </div>
-                    <div className="mt-6">
-                        <div className="h-1 w-24 bg-white rounded-full"></div>
+                        <div className="flex items-center gap-2 text-zinc-500 mb-2 uppercase tracking-widest text-xs font-bold">
+                            <Quote className="h-3 w-3" /> Daily Quote
+                        </div>
+                        <h2 className="text-xl md:text-2xl font-light italic text-white leading-relaxed mb-6">
+                            "{dailyQuote}"
+                        </h2>
+                        <div className="flex items-center gap-2">
+                            <div className="h-1 w-12 bg-white rounded-full"></div>
+                            <p className="text-zinc-400 text-sm">
+                                You've accumulated <span className="text-white font-medium">{stats?.totalHours || 0} hours</span> of focused study time.
+                            </p>
+                        </div>
                     </div>
 
                     {/* Subtle geometric decoration */}
@@ -78,11 +104,11 @@ const Dashboard = () => {
                     transition={{ delay: 0.1 }}
                     className="bento-card p-6 flex flex-col justify-between"
                 >
-                    <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 bg-zinc-900 rounded-lg border border-zinc-800">
-                            <Book className="h-5 w-5 text-zinc-400" />
+                            <Book className="h-4 w-4 text-zinc-400" />
                         </div>
-                        <span className="text-xs font-mono text-zinc-600 uppercase">Total Logs</span>
+                        <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Total Logs</span>
                     </div>
                     <div>
                         <div className="text-4xl font-bold text-white mt-4">{stats?.totalLogs || 0}</div>
@@ -172,6 +198,7 @@ const Dashboard = () => {
                 </div>
 
             </div>
+            <ReportCardModal isOpen={isReportOpen} onClose={() => setIsReportOpen(false)} stats={stats} userName={user?.name} />
         </div>
     );
 };

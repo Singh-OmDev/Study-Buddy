@@ -15,7 +15,7 @@ const Navbar = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
                     <div className="flex items-center">
-                        <Link to={user ? "/dashboard" : "/"} className="flex items-center space-x-2">
+                        <Link to="/" className="flex items-center space-x-2">
                             <div className="h-8 w-8 bg-white rounded-lg flex items-center justify-center">
                                 <BookOpen className="h-5 w-5 text-black" />
                             </div>
@@ -27,10 +27,12 @@ const Navbar = () => {
                         <>
                             <div className="hidden md:flex items-center space-x-1">
                                 <NavLink to="/dashboard" text="Dashboard" />
+                                <NavLink to="/focus" text="Focus" />
                                 <NavLink to="/calendar" text="Calendar" />
                                 <NavLink to="/log" text="Logger" />
                                 <NavLink to="/chat" text="Chat" />
                                 <NavLink to="/ai-revision" text="AI Tools" />
+                                <NavLink to="/pricing" text="Pricing" />
                             </div>
 
                             <div className="flex items-center">
@@ -44,6 +46,9 @@ const Navbar = () => {
                         </>
                     ) : (
                         <div className="flex items-center space-x-4">
+                            <Link to="/pricing" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
+                                Pricing
+                            </Link>
                             <Link to="/login" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
                                 Log In
                             </Link>
@@ -66,8 +71,8 @@ const NavLink = ({ to, text }) => {
         <Link
             to={to}
             className={`relative px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-300 ${isActive
-                    ? 'text-white bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.07)] border border-white/5'
-                    : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                ? 'text-white bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.07)] border border-white/5'
+                : 'text-zinc-400 hover:text-white hover:bg-white/5'
                 }`}
         >
             {text}

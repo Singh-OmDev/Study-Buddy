@@ -39,7 +39,15 @@ const AIStudyChat = () => {
             setMessages(prev => [...prev, { role: 'assistant', content: data.result }]);
         } catch (error) {
             console.error(error);
-            setMessages(prev => [...prev, { role: 'assistant', content: "Connection error. Please retry." }]);
+            let errorMessage = "Connection error. Please retry.";
+
+            if (error.response?.data?.outOfCredits) {
+                errorMessage = "🛑 **Limit Reached**\n\nYou've used your free credits. [Upgrade](/pricing) for unlimited access.";
+            } else if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            }
+
+            setMessages(prev => [...prev, { role: 'assistant', content: errorMessage }]);
         } finally {
             setLoading(false);
         }
@@ -99,8 +107,8 @@ const AIStudyChat = () => {
                                             strong: ({ node, ...props }) => <span className="font-bold text-white" {...props} />,
                                             ul: ({ node, ...props }) => <ul className="list-disc ml-4 space-y-1 my-2" {...props} />,
                                             ol: ({ node, ...props }) => <ol className="list-decimal ml-4 space-y-1 my-2" {...props} />,
-                                            li: ({ node, ...props }) => <li className="pl-1" {...props} />,
-                                            p: ({ node, ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                                            p: ({ node, ...props }) => <p className="mb-2 last:mb-0 font-sans" {...props} />,
+                                            li: ({ node, ...props }) => <li className="pl-1 font-sans" {...props} />,
                                             code: ({ node, inline, className, children, ...props }) => {
                                                 return inline ? (
                                                     <code className="bg-[#1a1a1a] px-1 py-0.5 rounded text-xs font-mono border border-[#333]" {...props}>{children}</code>
@@ -133,6 +141,24 @@ const AIStudyChat = () => {
 
             {/* Input Area */}
             <div className="p-4 bg-[#111111] border-t border-[#262626]">
+                {/* Quick Actions */}
+                <div className="flex gap-2 overflow-x-auto no-scrollbar mb-3">
+                    {[
+                        { label: "Quiz Me", prompt: "Test me on my last study session.", icon: Sparkles },
+                        { label: "Progress", prompt: "Summarize what I've learned this week.", icon: Terminal },
+                        { label: "Suggest Study", prompt: "What topic should I review based on my confidence?", icon: Bot }
+                    ].map((action, i) => (
+                        <button
+                            key={i}
+                            onClick={() => setInput(action.prompt)}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-[#1a1a1a] border border-[#262626] rounded-full text-xs text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors whitespace-nowrap"
+                        >
+                            <action.icon className="h-3 w-3" />
+                            {action.label}
+                        </button>
+                    ))}
+                </div>
+
                 <div className="flex items-center gap-2 bg-[#0a0a0a] border border-[#262626] p-2 rounded-lg focus-within:border-zinc-500 transition-colors">
                     <input
                         type="text"

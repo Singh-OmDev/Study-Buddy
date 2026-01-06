@@ -5,6 +5,8 @@ const userSchema = mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    credits: { type: Number, default: 5 },
+    plan: { type: String, enum: ['free', 'pro', 'team'], default: 'free' },
 }, { timestamps: true });
 
 userSchema.methods.matchPassword = async function (enteredPassword) {

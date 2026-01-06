@@ -9,6 +9,10 @@ import AIRevision from './pages/AIRevision';
 import CalendarView from './pages/CalendarView';
 import AIStudyChat from './pages/AIStudyChat';
 import Landing from './pages/Landing';
+import ZenMode from './pages/ZenMode';
+import Pricing from './pages/Pricing';
+import FocusMode from './pages/FocusMode';
+
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -23,6 +27,8 @@ function AppRoutes() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/zen" element={<ZenMode />} />
+          <Route path="/pricing" element={<Pricing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
@@ -59,6 +65,15 @@ function AppRoutes() {
             }
           />
           <Route
+            path="/focus"
+            element={
+              <PrivateRoute>
+                <FocusMode />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
             path="/ai-revision"
             element={
               <PrivateRoute>
@@ -74,7 +89,7 @@ function AppRoutes() {
 
 function App() {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <AppRoutes />
       </AuthProvider>

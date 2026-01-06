@@ -100,10 +100,42 @@ const getStats = async (req, res) => {
             return acc;
         }, {});
 
+        // Calculate Streak
+        const now = new Date();
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const startOfYesterday = startOfToday - 86400000;
+
+        // Get unique study dates (normalized to midnight)
+        const studyDates = [...new Set(logs.map(log => {
+            const d = new Date(log.date);
+            return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+        }))].sort((a, b) => b - a);
+
+        let streak = 0;
+        if (studyDates.length > 0) {
+            const lastStudyDate = studyDates[0];
+
+            // Streak is valid if last study was today or yesterday
+            if (lastStudyDate === startOfToday || lastStudyDate === startOfYesterday) {
+                streak = 1;
+                let expectedPrevDate = lastStudyDate - 86400000;
+
+                for (let i = 1; i < studyDates.length; i++) {
+                    if (studyDates[i] === expectedPrevDate) {
+                        streak++;
+                        expectedPrevDate -= 86400000;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
         res.json({
             totalLogs: logs.length,
             totalHours,
-            subjectStats
+            subjectStats,
+            streak
         });
     } catch (error) {
         res.status(500).json({ message: error.message });

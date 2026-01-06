@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, Brain, Calendar, BarChart2, Zap, Terminal, Sparkles } from 'lucide-react';
+import { ArrowRight, BookOpen, Brain, Calendar, BarChart2, Zap, Terminal, Sparkles, Clock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 
@@ -54,6 +54,12 @@ const Landing = () => {
                             </>
                         )}
                     </div>
+
+                    <div className="mt-8 animate-in fade-in delay-500">
+                        <Link to="/zen" className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-sm font-medium border-b border-transparent hover:border-zinc-500 pb-0.5">
+                            <Clock className="h-4 w-4" /> Enter Zen Mode
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Background Grid decorative */}
@@ -62,60 +68,117 @@ const Landing = () => {
 
             {/* Features Bento Grid */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-                <h2 className="text-sm font-mono text-zinc-500 uppercase tracking-widest mb-8 text-center">System Capabilities</h2>
+                <h2 className="text-sm font-mono text-zinc-500 uppercase tracking-widest mb-10 text-center">System Capabilities</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Feature 1: Logger */}
-                    <div className="bento-card p-8 md:col-span-2 relative overflow-hidden group">
+                    <div className="bento-card p-8 md:col-span-2 relative overflow-hidden group hover:border-zinc-600 transition-colors">
                         <div className="relative z-10">
-                            <div className="w-12 h-12 bg-[#1a1a1a] rounded-lg flex items-center justify-center mb-4 border border-[#262626]">
-                                <BookOpen className="h-6 w-6 text-white" />
+                            <div className="w-14 h-14 bg-[#1a1a1a] rounded-xl flex items-center justify-center mb-6 border border-[#262626] group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                                <BookOpen className="h-7 w-7 text-white" />
                             </div>
-                            <h3 className="text-2xl font-bold text-white mb-2">Smart Logging</h3>
-                            <p className="text-zinc-400 max-w-md">
-                                Don't just track time. Track *understanding*. Our structured logger asks for specific topics and confidence levels, creating a rich database of your knowledge.
+                            <h3 className="text-3xl font-extrabold text-white mb-3 tracking-tight">Smart Logging</h3>
+                            <p className="text-zinc-400 text-lg max-w-lg leading-relaxed">
+                                Track <span className="text-white font-semibold">understanding</span>, not just time. Our structured logger captures your confidence levels, building a true map of your knowledge.
                             </p>
                         </div>
                         <div className="absolute right-0 bottom-0 w-1/3 h-full bg-gradient-to-l from-[#1a1a1a] to-transparent opacity-50 group-hover:opacity-30 transition-opacity"></div>
                     </div>
 
                     {/* Feature 2: Analytics */}
-                    <div className="bento-card p-8 flex flex-col relative overflow-hidden">
-                        <div className="w-12 h-12 bg-[#1a1a1a] rounded-lg flex items-center justify-center mb-4 border border-[#262626]">
+                    <div className="bento-card p-8 flex flex-col relative overflow-hidden group hover:border-zinc-600 transition-colors">
+                        <div className="w-12 h-12 bg-[#1a1a1a] rounded-lg flex items-center justify-center mb-4 border border-[#262626] group-hover:rotate-6 transition-transform duration-300">
                             <BarChart2 className="h-6 w-6 text-white" />
                         </div>
                         <h3 className="text-xl font-bold text-white mb-2">Metrics</h3>
-                        <p className="text-zinc-400 text-sm">
-                            Visualize your subject distribution and consistency streaks on a Linear-style dashboard.
+                        <p className="text-zinc-400 text-sm leading-relaxed">
+                            Visualize subject mastery and streaks on a Linear-style dashboard.
                         </p>
                     </div>
 
                     {/* Feature 3: AI Chat */}
-                    <div className="bento-card p-8 flex flex-col relative overflow-hidden">
-                        <div className="w-12 h-12 bg-[#1a1a1a] rounded-lg flex items-center justify-center mb-4 border border-[#262626]">
+                    <div className="bento-card p-8 flex flex-col relative overflow-hidden group hover:border-zinc-600 transition-colors">
+                        <div className="w-12 h-12 bg-[#1a1a1a] rounded-lg flex items-center justify-center mb-4 border border-[#262626] group-hover:scale-110 transition-transform duration-300">
                             <Brain className="h-6 w-6 text-white" />
                         </div>
                         <h3 className="text-xl font-bold text-white mb-2">RAG AI Tutor</h3>
-                        <p className="text-zinc-400 text-sm">
-                            Chat with your data. "What did I study last week?" Our AI scans your history to give personalized answers.
+                        <p className="text-zinc-400 text-sm leading-relaxed">
+                            "What did I study last week?" Chat with an AI that knows your entire history.
                         </p>
                     </div>
 
                     {/* Feature 4: Tools */}
-                    <div className="bento-card p-8 md:col-span-2 relative overflow-hidden group">
+                    <div className="bento-card p-8 md:col-span-2 relative overflow-hidden group hover:border-zinc-600 transition-colors">
                         <div className="relative z-10">
-                            <div className="w-12 h-12 bg-[#1a1a1a] rounded-lg flex items-center justify-center mb-4 border border-[#262626]">
-                                <Terminal className="h-6 w-6 text-white" />
+                            <div className="w-14 h-14 bg-[#1a1a1a] rounded-xl flex items-center justify-center mb-6 border border-[#262626] group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                                <Terminal className="h-7 w-7 text-white" />
                             </div>
-                            <h3 className="text-2xl font-bold text-white mb-2">Active Recall Tools</h3>
-                            <p className="text-zinc-400 max-w-md">
-                                Instantly generate summaries and quizzes from your raw notes using advanced LLMs (Llama 3).
+                            <h3 className="text-3xl font-extrabold text-white mb-3 tracking-tight">Active Recall Tools</h3>
+                            <p className="text-zinc-400 text-lg max-w-lg leading-relaxed">
+                                Turn notes into power. Instantly generate summaries and quizzes from raw text using advanced LLMs.
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
 
+            {/* Value Proposition */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 border-t border-[#262626]">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                    <div>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-xs font-mono text-red-400 mb-6">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                            THE PROBLEM
+                        </div>
+                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
+                            Stop losing track of <br />
+                            <span className="text-zinc-500">your hard work.</span>
+                        </h2>
+                        <p className="text-zinc-400 text-lg leading-relaxed mb-8">
+                            Most students forget 70% of what they learn within 24 hours. Without tracking and active recall, your study sessions are just fleeting moments.
+                        </p>
+                        <div className="space-y-4">
+                            {[
+                                "Scattered notes across completely different apps",
+                                "No idea which subjects are falling behind",
+                                "Studying inefficiently without focus tools"
+                            ].map((item, i) => (
+                                <div key={i} className="flex items-center gap-3 text-zinc-500">
+                                    <div className="min-w-[6px] h-[6px] bg-zinc-700 rounded-full" />
+                                    {item}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="bg-[#0a0a0a] border border-[#262626] rounded-2xl p-8 md:p-12 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/5 blur-3xl rounded-full pointer-events-none"></div>
+
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-xs font-mono text-green-400 mb-8">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex items-center justify-center">
+                                <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-ping absolute opacity-75"></span>
+                            </span>
+                            THE SOLUTION
+                        </div>
+
+                        <h3 className="text-2xl font-bold text-white mb-8">The Intelligent Way</h3>
+                        <ul className="space-y-6">
+                            {[
+                                { text: "AI instantly analyzes your knowledge gaps", icon: Brain },
+                                { text: "Visual dashboards keep you accountable", icon: BarChart2 },
+                                { text: "Focus modes maximize deep work blocks", icon: Zap }
+                            ].map((item, i) => (
+                                <li key={i} className="flex items-start gap-4 text-zinc-200">
+                                    <div className="p-2 rounded-lg bg-[#1a1a1a] border border-[#262626] text-green-500">
+                                        <item.icon className="h-5 w-5" />
+                                    </div>
+                                    <span className="py-2 text-lg">{item.text}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            </div>
             {/* How it works */}
             <div className="py-20 border-t border-[#262626]">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -139,7 +202,7 @@ const Landing = () => {
                                     <h3 className="text-white font-bold text-lg mb-2">
                                         {item.title}
                                     </h3>
-                                    <p className="text-zinc-500 text-sm leading-relaxed max-w-[90%]">
+                                    <p className="text-zinc-400 text-sm leading-relaxed max-w-[90%]">
                                         {item.desc}
                                     </p>
                                 </div>
@@ -155,7 +218,7 @@ const Landing = () => {
                     <p className="text-zinc-600 text-sm">© 2024 StudyBuddy AI. Built for learners.</p>
                 </div>
             </footer>
-        </div>
+        </div >
     );
 };
 

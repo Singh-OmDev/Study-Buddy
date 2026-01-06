@@ -43,7 +43,10 @@ export const generateAIContent = async (type, context, prompt = "") => {
         - Use **bold** for key terms and question titles.
         - Use lists (- or 1.) for multiple points.
         - Use newlines \n\n to separate paragraphs clearly.
-        - If asking a multiple choice question, put each option on a new line.
+        - If the user asks to "Quiz" or "Test" them:
+            - Create 3 short conceptual questions based on their logs.
+            - Format them clearly (e.g., Q1: ...).
+            - Do not reveal answers immediately.
 
         Study Context:
         ${context}

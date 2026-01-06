@@ -1,17 +1,18 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { Check, ChevronRight, Clock, BookOpen, AlertCircle } from 'lucide-react';
 
 const StudyLogger = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
 
     // Form State
     const [subject, setSubject] = useState('');
-    const [topic, setTopic] = useState('');
-    const [time, setTime] = useState(45);
+    const [topic, setTopic] = useState(location.state?.initialTopic || '');
+    const [time, setTime] = useState(location.state?.initialDuration || 45);
     const [notes, setNotes] = useState('');
     const [confidence, setConfidence] = useState(3);
 
@@ -70,8 +71,8 @@ const StudyLogger = () => {
                                     key={sub}
                                     onClick={() => setSubject(sub)}
                                     className={`p-4 rounded-xl text-left transition-all border ${subject === sub
-                                            ? 'bg-white text-black border-white font-semibold'
-                                            : 'bg-[#1a1a1a] text-zinc-400 border-[#262626] hover:border-zinc-500 hover:text-white'
+                                        ? 'bg-white text-black border-white font-semibold'
+                                        : 'bg-[#1a1a1a] text-zinc-400 border-[#262626] hover:border-zinc-500 hover:text-white'
                                         }`}
                                 >
                                     {sub}
@@ -154,8 +155,8 @@ const StudyLogger = () => {
                                     key={level}
                                     onClick={() => setConfidence(level)}
                                     className={`w-12 h-12 rounded-full font-bold transition-all border ${confidence === level
-                                            ? 'bg-white text-black border-white scale-110'
-                                            : 'bg-transparent text-zinc-500 border-[#262626] hover:border-zinc-500 hover:text-white'
+                                        ? 'bg-white text-black border-white scale-110'
+                                        : 'bg-transparent text-zinc-500 border-[#262626] hover:border-zinc-500 hover:text-white'
                                         }`}
                                 >
                                     {level}
