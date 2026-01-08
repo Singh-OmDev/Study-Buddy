@@ -16,8 +16,8 @@ const Navbar = () => {
                 <div className="flex justify-between h-16">
                     <div className="flex items-center">
                         <Link to="/" className="flex items-center space-x-2">
-                            <div className="h-8 w-8 bg-white rounded-lg flex items-center justify-center">
-                                <BookOpen className="h-5 w-5 text-black" />
+                            <div className="h-8 w-8 bg-transparent rounded-lg flex items-center justify-center">
+                                <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
                             </div>
                             <span className="text-lg font-bold text-white tracking-tight">StudyBuddy</span>
                         </Link>
