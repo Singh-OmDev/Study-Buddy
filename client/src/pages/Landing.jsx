@@ -213,7 +213,7 @@ const Landing = () => {
             </div>
 
             {/* Footer */}
-            <footer className="border-t border-[#262626] bg-[#050505] pt-16 pb-8">
+            <footer className="border-t border-[#262626] bg-[#0a0a0a] pt-16 pb-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
                         <div className="col-span-2 md:col-span-1">

@@ -32,6 +32,7 @@ const Navbar = () => {
                                 <NavLink to="/log" text="Logger" />
                                 <NavLink to="/chat" text="Chat" />
                                 <NavLink to="/ai-revision" text="AI Tools" />
+                                <NavLink to="/features" text="Features" />
                                 <NavLink to="/pricing" text="Pricing" />
                             </div>
 
@@ -46,6 +47,9 @@ const Navbar = () => {
                         </>
                     ) : (
                         <div className="flex items-center space-x-4">
+                            <Link to="/features" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
+                                Features
+                            </Link>
                             <Link to="/pricing" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
                                 Pricing
                             </Link>

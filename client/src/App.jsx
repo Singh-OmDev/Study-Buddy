@@ -11,6 +11,7 @@ import AIStudyChat from './pages/AIStudyChat';
 import Landing from './pages/Landing';
 import ZenMode from './pages/ZenMode';
 import Pricing from './pages/Pricing';
+import Features from './pages/Features';
 import FocusMode from './pages/FocusMode';
 
 
@@ -29,6 +30,7 @@ function AppRoutes() {
           <Route path="/" element={<Landing />} />
           <Route path="/zen" element={<ZenMode />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/features" element={<Features />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
