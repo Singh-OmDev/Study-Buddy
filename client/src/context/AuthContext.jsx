@@ -21,6 +21,7 @@ export const AuthProvider = ({ children }) => {
             if (clerkUser) {
                 try {
                     const token = await getToken();
+                    console.log("AuthContext: Retrieved Token:", token ? token.slice(0, 10) + "..." : "NONE");
                     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
                 } catch (err) {
                     console.error("Failed to get token", err);

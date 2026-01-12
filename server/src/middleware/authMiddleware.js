@@ -1,20 +1,18 @@
 import { ClerkExpressRequireAuth, clerkClient } from '@clerk/clerk-sdk-node';
 import User from '../models/User.js';
 
-// Custom middleware that combines Clerk Auth with MongoDB User sync
-const protect = async (req, res, next) => {
-    // 1. Verify Clerk Token
-    // We wrap Clerk's middleware logic manually or use it as a precursor?
-    // Easiest is to use ClerkExpressRequireAuth which throws 401 if invalid.
-    // However, Express middlewares are chained. 
 
-    // Let's use the provided Middleware from the SDK
+const protect = async (req, res, next) => {
+    
+    console.log("Auth Middleware hit. Checking token...");
+
     ClerkExpressRequireAuth()(req, res, async (err) => {
         if (err) {
-            return res.status(401).json({ message: 'Not authorized, token failed' });
+            console.error("Clerk Auth Error:", err);
+            return res.status(401).json({ message: 'Not authorized, token failed', error: err.message });
         }
+        console.log("Clerk Auth Success. UserID:", req.auth.userId);
 
-        // 2. Sync to MongoDB
         try {
             const { userId } = req.auth;
 
@@ -25,7 +23,6 @@ const protect = async (req, res, next) => {
             let user = await User.findOne({ clerkId: userId });
 
             if (!user) {
-                // Lazy User Creation
                 console.log(`Creating new MongoDB user for Clerk ID: ${userId}`);
                 const clerkUser = await clerkClient.users.getUser(userId);
                 const email = clerkUser.emailAddresses[0]?.emailAddress;
