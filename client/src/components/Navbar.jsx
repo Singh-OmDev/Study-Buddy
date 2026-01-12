@@ -27,10 +27,12 @@ const Navbar = () => {
                     {user ? (
                         <>
                             <div className="hidden md:flex items-center space-x-1">
+                                                                <NavLink to="/features" text="Features" />
+
                                 <NavLink to="/dashboard" text="Dashboard" />
+                                <NavLink to="/log" text="Logger" />
                                 <NavLink to="/focus" text="Focus" />
                                 <NavLink to="/calendar" text="Calendar" />
-                                <NavLink to="/log" text="Logger" />
                                 <NavLink to="/chat" text="Chat" />
                                 <NavLink to="/ai-revision" text="AI Tools" />
                                 <NavLink to="/features" text="Features" />
