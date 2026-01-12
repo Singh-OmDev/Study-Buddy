@@ -4,13 +4,7 @@ import StudyLog from '../models/StudyLog.js';
 const generateContent = async (req, res) => {
     const { type, prompt, context } = req.body;
 
-    // Credit Check
-    if (req.user.plan === 'free' && req.user.credits <= 0) {
-        return res.status(403).json({
-            message: "You have used all your free AI credits. Upgrade to Pro for unlimited access.",
-            outOfCredits: true
-        });
-    }
+
 
     try {
         // Special Handling for Chat: Retrieve user context
@@ -33,10 +27,7 @@ const generateContent = async (req, res) => {
         const result = await generateAIContent(type, aiContext, prompt);
 
         // Deduct Credit if Free Plan
-        if (req.user.plan === 'free') {
-            req.user.credits = Math.max(0, req.user.credits - 1);
-            await req.user.save();
-        }
+
 
         res.json({ result: typeof result === 'string' ? result : JSON.stringify(result) });
     } catch (error) {

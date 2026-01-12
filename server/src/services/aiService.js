@@ -24,6 +24,15 @@ export const generateAIContent = async (type, context, prompt = "") => {
     } else if (type === 'questions') {
         systemPrompt = "You are a teacher creating a quiz. Generate 5 distinct revision questions.";
         userPrompt = `Generate 5 revision questions based on these notes:\n\n${context}`;
+    } else if (type === 'key_points') {
+        systemPrompt = "You are an expert note-taker. Extract the most critical key points/facts as a bulleted list.";
+        userPrompt = `Extract key points from these notes:\n\n${context}`;
+    } else if (type === 'flashcards') {
+        systemPrompt = "You are a studying assistant. Create 5 Flashcards from the content. Format as 'Concept: Definition'.";
+        userPrompt = `Generate 5 Flashcards (Term: Definition) based on:\n\n${context}`;
+    } else if (type === 'explanation') {
+        systemPrompt = "You are a tutor engaging with a student. Explain the following content simply (ELI5 style) with an analogy if possible.";
+        userPrompt = `Explain this concept simply:\n\n${context}`;
     } else if (type === 'analysis') {
         systemPrompt = `You are an AI study assistant. Analyze the study notes and return a JSON object with:
          - summary (string, 2-3 lines)

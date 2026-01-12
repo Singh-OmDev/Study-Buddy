@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { Sparkles, MessageSquare, BookOpen, Copy, Check, Terminal } from 'lucide-react';
+import { Sparkles, MessageSquare, BookOpen, Copy, Check, Terminal, List, StickyNote, Lightbulb } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AIRevision = () => {
     const [input, setInput] = useState('');
     const [result, setResult] = useState('');
     const [loading, setLoading] = useState(false);
-    const [mode, setMode] = useState('summary'); // 'summary' or 'questions'
+    const [mode, setMode] = useState('summary'); // 'summary' | 'questions' | 'key_points' | 'flashcards' | 'explanation'
     const [copied, setCopied] = useState(false);
 
     const handleGenerate = async () => {
@@ -33,34 +33,35 @@ const AIRevision = () => {
         setTimeout(() => setCopied(false), 2000);
     };
 
+    const modes = [
+        { id: 'summary', label: 'Summary', icon: BookOpen },
+        { id: 'key_points', label: 'Key Points', icon: List },
+        { id: 'questions', label: 'Quiz', icon: MessageSquare },
+        { id: 'flashcards', label: 'Flashcards', icon: StickyNote },
+        { id: 'explanation', label: 'Explain', icon: Lightbulb },
+    ];
+
     return (
         <div className="max-w-4xl mx-auto space-y-6">
-            <header className="flex items-end justify-between border-b border-[#262626] pb-6">
+            <header className="flex flex-col md:flex-row md:items-end md:justify-between border-b border-[#262626] pb-6 gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-white tracking-tight mb-2">AI Tools</h1>
-                    <p className="text-zinc-500">Generate learning materials from raw text.</p>
+                    <p className="text-zinc-500">Transform your notes into study materials.</p>
                 </div>
-                <div className="flex bg-[#1a1a1a] p-1 rounded-lg border border-[#262626]">
-                    <button
-                        onClick={() => setMode('summary')}
-                        className={`px-4 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-2 ${mode === 'summary'
+                <div className="flex bg-[#1a1a1a] p-1 rounded-lg border border-[#262626] overflow-x-auto no-scrollbar">
+                    {modes.map((m) => (
+                        <button
+                            key={m.id}
+                            onClick={() => setMode(m.id)}
+                            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-2 whitespace-nowrap ${mode === m.id
                                 ? 'bg-white text-black shadow-sm'
                                 : 'text-zinc-500 hover:text-zinc-300'
-                            }`}
-                    >
-                        <BookOpen className="h-3 w-3" />
-                        Summary
-                    </button>
-                    <button
-                        onClick={() => setMode('questions')}
-                        className={`px-4 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-2 ${mode === 'questions'
-                                ? 'bg-white text-black shadow-sm'
-                                : 'text-zinc-500 hover:text-zinc-300'
-                            }`}
-                    >
-                        <MessageSquare className="h-3 w-3" />
-                        Quiz
-                    </button>
+                                }`}
+                        >
+                            <m.icon className="h-3 w-3" />
+                            {m.label}
+                        </button>
+                    ))}
                 </div>
             </header>
 
