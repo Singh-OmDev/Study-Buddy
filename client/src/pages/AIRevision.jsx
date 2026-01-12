@@ -67,28 +67,30 @@ const AIRevision = () => {
                     <h1 className="text-3xl font-bold text-white tracking-tight mb-2">AI Tools</h1>
                     <p className="text-zinc-500">Transform your notes into study materials.</p>
                 </div>
-                <div className="flex bg-[#1a1a1a] p-1 rounded-lg border border-[#262626] overflow-x-auto no-scrollbar">
-                    {modes.map((m) => (
-                        <button
-                            key={m.id}
-                            onClick={() => setMode(m.id)}
-                            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-2 whitespace-nowrap ${mode === m.id
-                                ? 'bg-white text-black shadow-sm'
-                                : 'text-zinc-500 hover:text-zinc-300'
-                                }`}
-                        >
-                            <m.icon className="h-3 w-3" />
-                            {m.label}
-                        </button>
-                    ))}
+                <div className="flex items-center gap-3">
+                    <div className="flex bg-[#1a1a1a] p-1 rounded-lg border border-[#262626] overflow-x-auto no-scrollbar">
+                        {modes.map((m) => (
+                            <button
+                                key={m.id}
+                                onClick={() => setMode(m.id)}
+                                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-2 whitespace-nowrap ${mode === m.id
+                                    ? 'bg-white text-black shadow-sm'
+                                    : 'text-zinc-500 hover:text-zinc-300'
+                                    }`}
+                            >
+                                <m.icon className="h-3 w-3" />
+                                {m.label}
+                            </button>
+                        ))}
+                    </div>
+                    <button
+                        onClick={() => setShowHistory(!showHistory)}
+                        className={`h-[34px] px-3 rounded-lg border flex items-center gap-2 text-xs font-medium transition-colors ${showHistory ? 'bg-white text-black border-white' : 'bg-[#1a1a1a] text-zinc-400 border-[#262626] hover:text-white'}`}
+                    >
+                        <History className="h-4 w-4" />
+                        History
+                    </button>
                 </div>
-                <button
-                    onClick={() => setShowHistory(!showHistory)}
-                    className={`px-3 py-1.5 rounded-lg border flex items-center gap-2 text-xs font-medium transition-colors ${showHistory ? 'bg-white text-black border-white' : 'bg-[#1a1a1a] text-zinc-400 border-[#262626] hover:text-white'}`}
-                >
-                    <History className="h-4 w-4" />
-                    History
-                </button>
             </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[600px]">
