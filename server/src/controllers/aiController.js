@@ -1,10 +1,9 @@
 import { generateAIContent } from '../services/aiService.js';
 import StudyLog from '../models/StudyLog.js';
+import AIHistory from '../models/AIHistory.js';
 
 const generateContent = async (req, res) => {
     const { type, prompt, context } = req.body;
-
-
 
     try {
         // Special Handling for Chat: Retrieve user context
@@ -26,10 +25,19 @@ const generateContent = async (req, res) => {
 
         const result = await generateAIContent(type, aiContext, prompt);
 
-        // Deduct Credit if Free Plan
+        const finalResult = typeof result === 'string' ? result : JSON.stringify(result);
 
+        // Save to History (skip chat for now as it's ephemeral usually, or save it too if desired)
+        if (type !== 'chat') {
+            await AIHistory.create({
+                user: req.user._id,
+                type,
+                inputContext: context ? context.substring(0, 500) + (context.length > 500 ? "..." : "") : "",
+                result: finalResult
+            });
+        }
 
-        res.json({ result: typeof result === 'string' ? result : JSON.stringify(result) });
+        res.json({ result: finalResult });
     } catch (error) {
         console.error("AI Controller Error:", error);
         // Graceful fallback for demo if key missing
@@ -40,4 +48,13 @@ const generateContent = async (req, res) => {
     }
 }
 
-export { generateContent };
+const getHistory = async (req, res) => {
+    try {
+        const history = await AIHistory.find({ user: req.user._id }).sort({ createdAt: -1 });
+        res.json(history);
+    } catch (error) {
+        res.status(500).json({ message: "Failed to fetch history" });
+    }
+};
+
+export { generateContent, getHistory };

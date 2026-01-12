@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Sparkles, MessageSquare, BookOpen, Copy, Check, Terminal, List, StickyNote, Lightbulb } from 'lucide-react';
+import { Sparkles, MessageSquare, BookOpen, Copy, Check, Terminal, List, StickyNote, Lightbulb, History, X, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AIRevision = () => {
@@ -9,6 +9,24 @@ const AIRevision = () => {
     const [loading, setLoading] = useState(false);
     const [mode, setMode] = useState('summary'); // 'summary' | 'questions' | 'key_points' | 'flashcards' | 'explanation'
     const [copied, setCopied] = useState(false);
+
+    // History State
+    const [showHistory, setShowHistory] = useState(false);
+    const [history, setHistory] = useState([]);
+
+    const fetchHistory = async () => {
+        try {
+            const { data } = await axios.get('/api/ai/history');
+            setHistory(data);
+        } catch (error) {
+            console.error("Failed to fetch history", error);
+        }
+    };
+
+    // Fetch history on mount and when opening history
+    useEffect(() => {
+        fetchHistory();
+    }, []);
 
     const handleGenerate = async () => {
         if (!input) return;
@@ -19,6 +37,7 @@ const AIRevision = () => {
                 context: input
             });
             setResult(data.result);
+            fetchHistory(); // Refresh history after generation
         } catch (error) {
             console.error(error);
             setResult(error.response?.data?.message || "Error generating content. Please try again.");
@@ -63,6 +82,13 @@ const AIRevision = () => {
                         </button>
                     ))}
                 </div>
+                <button
+                    onClick={() => setShowHistory(!showHistory)}
+                    className={`px-3 py-1.5 rounded-lg border flex items-center gap-2 text-xs font-medium transition-colors ${showHistory ? 'bg-white text-black border-white' : 'bg-[#1a1a1a] text-zinc-400 border-[#262626] hover:text-white'}`}
+                >
+                    <History className="h-4 w-4" />
+                    History
+                </button>
             </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[600px]">
@@ -146,7 +172,72 @@ const AIRevision = () => {
                     <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] z-0 bg-[length:100%_2px,3px_100%] pointer-events-none opacity-20"></div>
                 </div>
             </div>
-        </div>
+
+
+            {/* History Slide-over */}
+            <AnimatePresence>
+                {showHistory && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 0.5 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowHistory(false)}
+                            className="fixed inset-0 bg-black z-40 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ x: '100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-[#0a0a0a] border-l border-[#262626] z-50 p-6 flex flex-col shadow-2xl"
+                        >
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                                    <History className="h-5 w-5" /> History
+                                </h2>
+                                <button onClick={() => setShowHistory(false)} className="p-2 hover:bg-[#1a1a1a] rounded-full text-zinc-400 hover:text-white transition-colors">
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto space-y-4 pr-2 scrollbar-thin scrollbar-thumb-[#262626]">
+                                {history.length === 0 ? (
+                                    <div className="text-center text-zinc-500 py-10">
+                                        <History className="h-10 w-10 mx-auto mb-3 opacity-20" />
+                                        <p>No history yet.</p>
+                                    </div>
+                                ) : (
+                                    history.map((item) => (
+                                        <div
+                                            key={item._id}
+                                            onClick={() => {
+                                                setResult(JSON.parse(JSON.stringify(item.result))); // Ensure string/object is handled
+                                                setInput(item.inputContext || "");
+                                                setMode(item.type);
+                                                setShowHistory(false);
+                                            }}
+                                            className="p-4 bg-[#111111] border border-[#262626] rounded-lg cursor-pointer hover:border-zinc-500 transition-colors group"
+                                        >
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-xs font-bold text-white capitalize bg-[#1a1a1a] px-2 py-1 rounded border border-[#262626]">{item.type.replace('_', ' ')}</span>
+                                                <span className="text-xs text-zinc-500 flex items-center gap-1">
+                                                    <Clock className="h-3 w-3" />
+                                                    {new Date(item.createdAt).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-zinc-400 line-clamp-2 font-mono">
+                                                {item.inputContext ? item.inputContext : "No context"}
+                                            </p>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+        </div >
     );
 };
 
