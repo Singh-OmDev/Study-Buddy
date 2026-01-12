@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BookOpen, BarChart2, Brain, LogOut, Calendar, Sparkles } from 'lucide-react';
+import { BookOpen, BarChart2, Brain, LogOut, Calendar, Sparkles, MessageSquare, Zap } from 'lucide-react';
 import { UserButton } from '@clerk/clerk-react';
 
 const Navbar = () => {
@@ -27,15 +27,13 @@ const Navbar = () => {
                     {user ? (
                         <>
                             <div className="hidden md:flex items-center space-x-1">
-                                                                <NavLink to="/features" text="Features" />
-
-                                <NavLink to="/dashboard" text="Dashboard" />
-                                <NavLink to="/log" text="Logger" />
-                                <NavLink to="/focus" text="Focus" />
-                                <NavLink to="/calendar" text="Calendar" />
-                                <NavLink to="/chat" text="Chat" />
-                                <NavLink to="/ai-revision" text="AI Tools" />
-                                <NavLink to="/features" text="Features" />
+                                <NavLink to="/dashboard" text="Dashboard" icon={BarChart2} />
+                                <NavLink to="/log" text="Logger" icon={BookOpen} />
+                                <NavLink to="/focus" text="Focus" icon={Brain} />
+                                <NavLink to="/calendar" text="Calendar" icon={Calendar} />
+                                <NavLink to="/chat" text="Chat" icon={MessageSquare} />
+                                <NavLink to="/ai-revision" text="AI Tools" icon={Sparkles} />
+                                <NavLink to="/features" text="Features" icon={Zap} />
 
                             </div>
 
@@ -63,19 +61,20 @@ const Navbar = () => {
     );
 };
 
-const NavLink = ({ to, text }) => {
+const NavLink = ({ to, text, icon: Icon }) => {
     const location = useLocation();
     const isActive = location.pathname === to;
 
     return (
         <Link
             to={to}
-            className={`relative px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-300 ${isActive
-                ? 'text-white bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.07)] border border-white/5'
+            className={`relative px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-300 flex items-center space-x-2 ${isActive
+                ? 'text-white bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.07)] border border-white/10'
                 : 'text-zinc-400 hover:text-white hover:bg-white/5'
                 }`}
         >
-            {text}
+            {Icon && <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-zinc-400 group-hover:text-white'}`} />}
+            <span>{text}</span>
         </Link>
     );
 }
