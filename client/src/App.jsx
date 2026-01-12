@@ -1,8 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Outlet } from 'react-router-dom';
 import { ClerkProvider, SignedIn, SignedOut, SignIn, SignUp } from '@clerk/clerk-react';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
 import StudyLogger from './pages/StudyLogger';
 import AIRevision from './pages/AIRevision';
 import CalendarView from './pages/CalendarView';
@@ -55,13 +56,16 @@ function AppRoutes() {
           <Route path="/register/*" element={<div className="flex justify-center items-center mt-20"><SignUp routing="path" path="/register" signInUrl="/login" fallbackRedirectUrl="/dashboard" /></div>} />
 
           {/* Protected Routes */}
-          <Route path="/zen" element={<ProtectedRoute><ZenMode /></ProtectedRoute>} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/calendar" element={<ProtectedRoute><CalendarView /></ProtectedRoute>} />
-          <Route path="/log" element={<ProtectedRoute><StudyLogger /></ProtectedRoute>} />
-          <Route path="/chat" element={<ProtectedRoute><AIStudyChat /></ProtectedRoute>} />
-          <Route path="/focus" element={<ProtectedRoute><FocusMode /></ProtectedRoute>} />
-          <Route path="/ai-revision" element={<ProtectedRoute><AIRevision /></ProtectedRoute>} />
+          <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/log" element={<StudyLogger />} />
+            <Route path="/calendar" element={<CalendarView />} />
+            <Route path="/chat" element={<AIStudyChat />} />
+            <Route path="/focus" element={<FocusMode />} />
+            <Route path="/ai-revision" element={<AIRevision />} />
+            <Route path="/zen" element={<ZenMode />} />
+          </Route>
         </Routes>
       </div>
 

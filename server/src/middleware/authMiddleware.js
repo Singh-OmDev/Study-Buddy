@@ -3,8 +3,9 @@ import User from '../models/User.js';
 
 
 const protect = async (req, res, next) => {
-    
-    console.log("Auth Middleware hit. Checking token...");
+    // Let's use the provided Middleware from the SDK
+    console.log("Auth Middleware hit. Path:", req.path);
+    console.log("Auth Header:", req.headers.authorization ? "Present (" + req.headers.authorization.length + " chars)" : "MISSING");
 
     ClerkExpressRequireAuth()(req, res, async (err) => {
         if (err) {
