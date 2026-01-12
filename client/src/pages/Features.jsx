@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { BookOpen, Brain, BarChart2, Zap, Terminal, Share2, Shield, Globe, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import Footer from '../components/Footer';
+
 
 const Features = () => {
     const features = [
@@ -116,7 +116,7 @@ const Features = () => {
                     </div>
                 </motion.div>
             </div>
-            <Footer />
+            {/* Footer Removed - handled globally */}
         </div>
     );
 };

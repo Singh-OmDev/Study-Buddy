@@ -21,11 +21,36 @@ const PrivateRoute = ({ children }) => {
   return user ? children : <Navigate to="/login" />;
 };
 
+
+import { useLocation } from 'react-router-dom';
+import Footer from './components/Footer';
+
+// Pages where the main layout wrapper and Footer should be modified/hidden
+const NO_FOOTER_ROUTES = ['/zen', '/focus'];
+const AUTH_ROUTES = ['/login', '/register'];
+
 function AppRoutes() {
+  const location = useLocation();
+  const isZenOrFocus = NO_FOOTER_ROUTES.includes(location.pathname);
+  const isAuth = AUTH_ROUTES.includes(location.pathname);
+  const showFooter = !isZenOrFocus && !isAuth && !location.pathname.startsWith('/dashboard') && !location.pathname.startsWith('/calendar') && !location.pathname.startsWith('/log') && !location.pathname.startsWith('/chat') && !location.pathname.startsWith('/ai-revision');
+
+  // For app pages (Dashboard, etc), we might want a different layout or no large footer.
+  // The user requested to hide the large marketing footer on "App" pages.
+  // So showFooter is true only for public pages: /, /pricing, /features. 
+
+  // Wait, simpler logic based on user request:
+  // "Hide this large marketing footer on "App" pages like Dashboard, Calendar, and Chat, as well as immersive modes like Zen Mode."
+  // "It will appear on public pages (Landing, Pricing, Features)."
+
+  const PUBLIC_ROUTES = ['/', '/pricing', '/features', '/terms', '/privacy', '/cookies']; // Add other public routes if known
+  const shouldShowFooter = PUBLIC_ROUTES.includes(location.pathname);
+
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pb-10">
+    <div className={`flex flex-col min-h-screen bg-[#0a0a0a] ${shouldShowFooter ? '' : 'pb-0'}`}>
       <Navbar />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Main content wrapper */}
+      <div className={`flex-grow ${isZenOrFocus ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full'}`}>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/zen" element={<ZenMode />} />
@@ -85,9 +110,12 @@ function AppRoutes() {
           />
         </Routes>
       </div>
+
+      {shouldShowFooter && <Footer />}
     </div>
   )
 }
+
 
 function App() {
   return (
