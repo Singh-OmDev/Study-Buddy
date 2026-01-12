@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { BookOpen, BarChart2, Brain, LogOut, Calendar, Sparkles } from 'lucide-react';
+import { UserButton } from '@clerk/clerk-react';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
@@ -33,16 +34,11 @@ const Navbar = () => {
                                 <NavLink to="/chat" text="Chat" />
                                 <NavLink to="/ai-revision" text="AI Tools" />
                                 <NavLink to="/features" text="Features" />
-                                <NavLink to="/pricing" text="Pricing" />
+
                             </div>
 
-                            <div className="flex items-center">
-                                <button
-                                    onClick={logout}
-                                    className="ml-4 text-xs font-medium text-zinc-500 hover:text-white transition-colors border border-zinc-800 rounded-md px-3 py-1.5 hover:border-zinc-600"
-                                >
-                                    Sign Out
-                                </button>
+                            <div className="flex items-center ml-4">
+                                <UserButton afterSignOutUrl="/" />
                             </div>
                         </>
                     ) : (
@@ -50,9 +46,7 @@ const Navbar = () => {
                             <Link to="/features" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
                                 Features
                             </Link>
-                            <Link to="/pricing" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
-                                Pricing
-                            </Link>
+
                             <Link to="/login" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
                                 Log In
                             </Link>

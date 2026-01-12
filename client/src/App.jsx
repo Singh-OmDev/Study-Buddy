@@ -1,49 +1,41 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { ClerkProvider, SignedIn, SignedOut, SignIn, SignUp } from '@clerk/clerk-react';
+import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
-import Login from './pages/Login';
-import Register from './pages/Register';
 import StudyLogger from './pages/StudyLogger';
 import AIRevision from './pages/AIRevision';
 import CalendarView from './pages/CalendarView';
 import AIStudyChat from './pages/AIStudyChat';
 import Landing from './pages/Landing';
 import ZenMode from './pages/ZenMode';
-import Pricing from './pages/Pricing';
+
 import Features from './pages/Features';
 import FocusMode from './pages/FocusMode';
-
-
-const PrivateRoute = ({ children }) => {
-  const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-zinc-500">Loading...</div>;
-  return user ? children : <Navigate to="/login" />;
-};
-
-
-import { useLocation } from 'react-router-dom';
 import Footer from './components/Footer';
 
 // Pages where the main layout wrapper and Footer should be modified/hidden
 const NO_FOOTER_ROUTES = ['/zen', '/focus'];
-const AUTH_ROUTES = ['/login', '/register'];
+const AUTH_ROUTES = ['/login', '/register', '/sign-in', '/sign-up'];
+
+// Protected Route Wrapper
+// If signed in, show children.
+// If signed out, redirect to /login to show the Clerk SignIn component we put there.
+const ProtectedRoute = ({ children }) => {
+  return (
+    <>
+      <SignedIn>{children}</SignedIn>
+      <SignedOut><Navigate to="/login" /></SignedOut>
+    </>
+  );
+};
 
 function AppRoutes() {
   const location = useLocation();
   const isZenOrFocus = NO_FOOTER_ROUTES.includes(location.pathname);
-  const isAuth = AUTH_ROUTES.includes(location.pathname);
-  const showFooter = !isZenOrFocus && !isAuth && !location.pathname.startsWith('/dashboard') && !location.pathname.startsWith('/calendar') && !location.pathname.startsWith('/log') && !location.pathname.startsWith('/chat') && !location.pathname.startsWith('/ai-revision');
-
-  // For app pages (Dashboard, etc), we might want a different layout or no large footer.
-  // The user requested to hide the large marketing footer on "App" pages.
-  // So showFooter is true only for public pages: /, /pricing, /features. 
-
-  // Wait, simpler logic based on user request:
-  // "Hide this large marketing footer on "App" pages like Dashboard, Calendar, and Chat, as well as immersive modes like Zen Mode."
-  // "It will appear on public pages (Landing, Pricing, Features)."
-
-  const PUBLIC_ROUTES = ['/', '/pricing', '/features', '/terms', '/privacy', '/cookies']; // Add other public routes if known
+  // Remove footer on auth pages too
+  const isAuth = AUTH_ROUTES.some(route => location.pathname.startsWith(route));
+  const PUBLIC_ROUTES = ['/', '/features', '/terms', '/privacy', '/cookies']; // Add other public routes if known
   const shouldShowFooter = PUBLIC_ROUTES.includes(location.pathname);
 
   return (
@@ -52,62 +44,24 @@ function AppRoutes() {
       {/* Main content wrapper */}
       <div className={`flex-grow ${isZenOrFocus ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full'}`}>
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Landing />} />
-          <Route path="/zen" element={<ZenMode />} />
-          <Route path="/pricing" element={<Pricing />} />
+
           <Route path="/features" element={<Features />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
 
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/calendar"
-            element={
-              <PrivateRoute>
-                <CalendarView />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/log"
-            element={
-              <PrivateRoute>
-                <StudyLogger />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/chat"
-            element={
-              <PrivateRoute>
-                <AIStudyChat />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/focus"
-            element={
-              <PrivateRoute>
-                <FocusMode />
-              </PrivateRoute>
-            }
-          />
+          {/* Auth Routes - Centered */}
+          {/* We mount Clerk's components here so /login is a valid route */}
+          <Route path="/login/*" element={<div className="flex justify-center items-center mt-20"><SignIn routing="path" path="/login" signUpUrl="/register" fallbackRedirectUrl="/dashboard" /></div>} />
+          <Route path="/register/*" element={<div className="flex justify-center items-center mt-20"><SignUp routing="path" path="/register" signInUrl="/login" fallbackRedirectUrl="/dashboard" /></div>} />
 
-          <Route
-            path="/ai-revision"
-            element={
-              <PrivateRoute>
-                <AIRevision />
-              </PrivateRoute>
-            }
-          />
+          {/* Protected Routes */}
+          <Route path="/zen" element={<ProtectedRoute><ZenMode /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/calendar" element={<ProtectedRoute><CalendarView /></ProtectedRoute>} />
+          <Route path="/log" element={<ProtectedRoute><StudyLogger /></ProtectedRoute>} />
+          <Route path="/chat" element={<ProtectedRoute><AIStudyChat /></ProtectedRoute>} />
+          <Route path="/focus" element={<ProtectedRoute><FocusMode /></ProtectedRoute>} />
+          <Route path="/ai-revision" element={<ProtectedRoute><AIRevision /></ProtectedRoute>} />
         </Routes>
       </div>
 
@@ -116,14 +70,36 @@ function AppRoutes() {
   )
 }
 
-
 function App() {
+  console.log("Current Environment Variables:", import.meta.env);
+  const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+  if (!clerkPubKey) {
+    return (
+      <div className="min-h-screen bg-black text-red-500 flex items-center justify-center p-4">
+        <div className="max-w-md bg-zinc-900 border border-red-900 p-6 rounded-lg">
+          <h1 className="text-xl font-bold mb-4">Configuration Error</h1>
+          <p>Missing <code>VITE_CLERK_PUBLISHABLE_KEY</code> in environment variables.</p>
+          <p className="mt-2 text-sm text-zinc-400">Please check your .env file and restart the server.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </Router>
+    <ClerkProvider
+      publishableKey={clerkPubKey}
+      signInUrl="/login"
+      signUpUrl="/register"
+      signInFallbackRedirectUrl="/dashboard"
+      signUpFallbackRedirectUrl="/dashboard"
+    >
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </Router>
+    </ClerkProvider>
   );
 }
 

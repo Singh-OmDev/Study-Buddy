@@ -1,53 +1,46 @@
-import { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useContext, useEffect } from 'react';
+import { useUser, useAuth as useClerkAuth } from '@clerk/clerk-react';
 import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const { user: clerkUser, isLoaded: isUserLoaded } = useUser();
+    const { getToken, signOut } = useClerkAuth();
+
+    // Map Clerk user to our app's user structure
+    const user = clerkUser ? {
+        _id: clerkUser.id,
+        name: clerkUser.fullName,
+        email: clerkUser.primaryEmailAddress?.emailAddress,
+        imageUrl: clerkUser.imageUrl
+    } : null;
 
     useEffect(() => {
-        const userInfo = localStorage.getItem('userInfo');
-        if (userInfo) {
-            const parsedUser = JSON.parse(userInfo);
-            setUser(parsedUser);
-            // Set default auth header
-            axios.defaults.headers.common['Authorization'] = `Bearer ${parsedUser.token}`;
-        }
-        setLoading(false);
-    }, []);
+        const setupAuth = async () => {
+            if (clerkUser) {
+                try {
+                    const token = await getToken();
+                    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                } catch (err) {
+                    console.error("Failed to get token", err);
+                }
+            } else {
+                delete axios.defaults.headers.common['Authorization'];
+            }
+        };
 
-    const login = async (email, password) => {
-        try {
-            const { data } = await axios.post('/api/auth/login', { email, password });
-            localStorage.setItem('userInfo', JSON.stringify(data));
-            setUser(data);
-            axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-            return { success: true };
-        } catch (error) {
-            return { success: false, error: error.response?.data?.message || 'Login failed' };
+        if (isUserLoaded) {
+            setupAuth();
         }
-    };
+    }, [clerkUser, isUserLoaded, getToken]);
 
-    const register = async (name, email, password) => {
-        try {
-            const { data } = await axios.post('/api/auth/register', { name, email, password });
-            localStorage.setItem('userInfo', JSON.stringify(data));
-            setUser(data);
-            axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-            return { success: true };
-        } catch (error) {
-            return { success: false, error: error.response?.data?.message || 'Registration failed' };
-        }
-    };
+    // Backward compatibility helpers
+    const login = () => { /* Handled by Clerk */ };
+    const register = () => { /* Handled by Clerk */ };
+    const logout = () => signOut();
 
-    const logout = () => {
-        localStorage.removeItem('userInfo');
-        setUser(null);
-        delete axios.defaults.headers.common['Authorization'];
-    };
+    const loading = !isUserLoaded;
 
     return (
         <AuthContext.Provider value={{ user, login, register, logout, loading }}>

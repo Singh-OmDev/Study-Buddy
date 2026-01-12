@@ -1,32 +1,53 @@
-import jwt from 'jsonwebtoken';
+import { ClerkExpressRequireAuth, clerkClient } from '@clerk/clerk-sdk-node';
 import User from '../models/User.js';
 
+// Custom middleware that combines Clerk Auth with MongoDB User sync
 const protect = async (req, res, next) => {
-    let token;
+    // 1. Verify Clerk Token
+    // We wrap Clerk's middleware logic manually or use it as a precursor?
+    // Easiest is to use ClerkExpressRequireAuth which throws 401 if invalid.
+    // However, Express middlewares are chained. 
 
-    if (
-        req.headers.authorization &&
-        req.headers.authorization.startsWith('Bearer')
-    ) {
+    // Let's use the provided Middleware from the SDK
+    ClerkExpressRequireAuth()(req, res, async (err) => {
+        if (err) {
+            return res.status(401).json({ message: 'Not authorized, token failed' });
+        }
+
+        // 2. Sync to MongoDB
         try {
-            token = req.headers.authorization.split(' ')[1];
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const { userId } = req.auth;
 
-            const user = await User.findById(decoded.id).select('-password');
+            if (!userId) {
+                return res.status(401).json({ message: 'No User ID found' });
+            }
+
+            let user = await User.findOne({ clerkId: userId });
 
             if (!user) {
-                return res.status(401).json({ message: 'User not found' });
+                // Lazy User Creation
+                console.log(`Creating new MongoDB user for Clerk ID: ${userId}`);
+                const clerkUser = await clerkClient.users.getUser(userId);
+                const email = clerkUser.emailAddresses[0]?.emailAddress;
+                const name = `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || 'User';
+
+                user = await User.create({
+                    clerkId: userId,
+                    name,
+                    email,
+                    credits: 5,
+                    plan: 'free'
+                });
             }
 
             req.user = user;
             next();
+
         } catch (error) {
-            console.error(error);
-            res.status(401).json({ message: 'Not authorized, token failed' });
+            console.error("Auth Middleware Error:", error);
+            res.status(500).json({ message: 'Server error during authentication' });
         }
-    } else {
-        res.status(401).json({ message: 'Not authorized, no token' });
-    }
+    });
 };
 
 export { protect };
