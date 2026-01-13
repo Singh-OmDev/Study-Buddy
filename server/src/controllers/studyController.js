@@ -131,15 +131,41 @@ const getStats = async (req, res) => {
             }
         }
 
+        const recentLogs = logs.slice(-5).reverse();
+
         res.json({
             totalLogs: logs.length,
             totalHours,
             subjectStats,
-            streak
+            streak,
+            recentLogs
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 }
 
-export { createStudyLog, getStudyLogs, getStats };
+// @desc    Delete study log
+// @route   DELETE /api/study/:id
+// @access  Private
+const deleteStudyLog = async (req, res) => {
+    try {
+        const log = await StudyLog.findById(req.params.id);
+
+        if (!log) {
+            return res.status(404).json({ message: 'Log not found' });
+        }
+
+        // Ensure user owns the log
+        if (log.user.toString() !== req.user._id.toString()) {
+            return res.status(401).json({ message: 'Not authorized' });
+        }
+
+        await log.deleteOne();
+        res.json({ message: 'Study log removed' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export { createStudyLog, getStudyLogs, getStats, deleteStudyLog };

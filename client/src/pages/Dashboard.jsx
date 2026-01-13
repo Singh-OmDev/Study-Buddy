@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Clock, Book, CheckCircle, TrendingUp, Zap, ArrowUpRight, Quote } from 'lucide-react';
+import { Clock, Book, CheckCircle, TrendingUp, Zap, ArrowUpRight, Quote, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import ReportCardModal from '../components/ReportCardModal';
@@ -39,7 +39,26 @@ const Dashboard = () => {
         };
 
         fetchStats();
-    }, [user]);
+    }, [user, getToken]);
+
+    const handleDelete = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this log?")) return;
+        try {
+            const token = await getToken();
+            await axios.delete(`/api/study/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            // Optimistic update
+            setStats(prev => ({
+                ...prev,
+                recentLogs: prev.recentLogs.filter(log => log._id !== id),
+                totalLogs: prev.totalLogs - 1
+            }));
+        } catch (error) {
+            console.error("Failed to delete log", error);
+            alert("Failed to delete log");
+        }
+    };
 
     if (loading) return (
         <div className="flex h-[50vh] items-center justify-center text-zinc-500 font-mono text-sm">
@@ -200,6 +219,47 @@ const Dashboard = () => {
                         <div className="text-xs text-zinc-500 uppercase tracking-wider mt-1">Active Subjects</div>
                     </motion.div>
                 </div>
+
+                {/* Recent Activity Card - Spans 3 cols (Full Width) */}
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="md:col-span-3 bento-card p-6"
+                >
+                    <h3 className="text-sm font-medium text-zinc-400 uppercase tracking-widest mb-4">Recent Activity</h3>
+                    <div className="space-y-3">
+                        {stats?.recentLogs?.length > 0 ? (
+                            stats.recentLogs.map((log) => (
+                                <div key={log._id} className="flex items-center justify-between p-3 bg-[#111111] border border-[#262626] rounded-lg group hover:border-zinc-700 transition-colors">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-10 w-10 bg-zinc-900 rounded-full flex items-center justify-center">
+                                            <CheckCircle className="h-5 w-5 text-green-500" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-white font-medium text-sm">{log.topic}</h4>
+                                            <p className="text-zinc-500 text-xs">
+                                                {log.subject} • {new Date(log.date).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <span className="text-white font-mono text-sm">{log.durationMinutes}m</span>
+                                        <button
+                                            onClick={() => handleDelete(log._id)}
+                                            className="p-2 text-zinc-600 hover:text-red-500 hover:bg-zinc-900 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+                                            title="Delete Log"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center py-8 text-zinc-600 text-sm">No study logs yet. Start focusing!</div>
+                        )}
+                    </div>
+                </motion.div>
 
             </div>
             <ReportCardModal isOpen={isReportOpen} onClose={() => setIsReportOpen(false)} stats={stats} userName={user?.name} />

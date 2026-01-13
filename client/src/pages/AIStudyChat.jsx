@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { Send, User, Bot, Sparkles, Terminal } from 'lucide-react';
+import { Send, User, Bot, Sparkles, Terminal, Layers, Target, Lightbulb, Calendar as CalendarIcon, Search } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useAuth } from '../context/AuthContext';
@@ -151,7 +151,12 @@ const AIStudyChat = () => {
                     {[
                         { label: "Quiz Me", prompt: "Test me on my last study session.", icon: Sparkles },
                         { label: "Progress", prompt: "Summarize what I've learned this week.", icon: Terminal },
-                        { label: "Suggest Study", prompt: "What topic should I review based on my confidence?", icon: Bot }
+                        { label: "Suggest Study", prompt: "What topic should I review based on my confidence?", icon: Bot },
+                        { label: "Flashcards", prompt: "Create 3 key flashcards from my recent notes.", icon: Layers },
+                        { label: "Find Gaps", prompt: "Analyze my history and find my weakest areas.", icon: Target },
+                        { label: "Explain", prompt: "Explain the last topic I studied like I'm 5 years old.", icon: Lightbulb },
+                        { label: "3-Day Plan", prompt: "Create a structured 3-day study plan covering my weak areas.", icon: CalendarIcon },
+                        { label: "Deep Dive", prompt: "Pick one concept I struggled with and explain it in depth.", icon: Search }
                     ].map((action, i) => (
                         <button
                             key={i}
