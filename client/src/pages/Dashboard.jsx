@@ -16,7 +16,7 @@ const QUOTES = [
 ];
 
 const Dashboard = () => {
-    const { user } = useAuth();
+    const { user, getToken } = useAuth();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isReportOpen, setIsReportOpen] = useState(false);
@@ -26,7 +26,10 @@ const Dashboard = () => {
         const fetchStats = async () => {
             if (!user) return; // Wait for user to be loaded
             try {
-                const { data } = await axios.get('/api/study/stats');
+                const token = await getToken();
+                const { data } = await axios.get('/api/study/stats', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 setStats(data);
             } catch (error) {
                 console.error("Error fetching stats", error);

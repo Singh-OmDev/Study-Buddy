@@ -34,7 +34,6 @@ const Navbar = () => {
                                 <NavLink to="/calendar" text="Calendar" icon={Calendar} />
                                 <NavLink to="/chat" text="Chat" icon={MessageSquare} />
                                 <NavLink to="/ai-revision" text="AI Tools" icon={Sparkles} />
-                                <NavLink to="/ai-revision" text="AI Tools" icon={Sparkles} />
                             </div>
 
                             <div className="flex items-center ml-4">

@@ -6,7 +6,7 @@ import remarkGfm from 'remark-gfm';
 import { useAuth } from '../context/AuthContext';
 
 const AIStudyChat = () => {
-    const { user } = useAuth();
+    const { user, getToken } = useAuth();
     const [messages, setMessages] = useState([
         { role: 'assistant', content: `Hello ${user.name}. I have access to your study logs. How can I assist you today?` }
     ]);
@@ -31,9 +31,14 @@ const AIStudyChat = () => {
         setLoading(true);
 
         try {
+            const token = await getToken();
             const { data } = await axios.post('/api/ai/generate', {
                 type: 'chat',
                 prompt: input
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
             });
 
             setMessages(prev => [...prev, { role: 'assistant', content: data.result }]);
@@ -107,7 +112,7 @@ const AIStudyChat = () => {
                                             strong: ({ node, ...props }) => <span className="font-bold text-white" {...props} />,
                                             ul: ({ node, ...props }) => <ul className="list-disc ml-4 space-y-1 my-2" {...props} />,
                                             ol: ({ node, ...props }) => <ol className="list-decimal ml-4 space-y-1 my-2" {...props} />,
-                                            p: ({ node, ...props }) => <p className="mb-2 last:mb-0 font-sans" {...props} />,
+                                            p: ({ node, ...props }) => <p className="mb-2 last:mb-0 font-sans whitespace-pre-wrap" {...props} />,
                                             li: ({ node, ...props }) => <li className="pl-1 font-sans" {...props} />,
                                             code: ({ node, inline, className, children, ...props }) => {
                                                 return inline ? (
