@@ -7,7 +7,8 @@ const generateContent = async (req, res) => {
 
     try {
         // Special Handling for Chat: Retrieve user context
-        let aiContext = context;
+        let aiContext = context || "";
+
         if (type === 'chat') {
             // RAG: Fetch last 20 study logs
             const logs = await StudyLog.find({ user: req.user._id })
@@ -20,7 +21,14 @@ const generateContent = async (req, res) => {
                 `- [${new Date(log.date).toLocaleDateString()}] ${log.subject}: ${log.topic} (Confidence: ${log.confidenceLevel}/5). Notes: ${log.aiSummary}`
             ).join('\n');
 
-            aiContext = history.length > 0 ? history : "No study history found yet.";
+            const historyText = history.length > 0 ? history : "No study history found yet.";
+
+            // Combine File Context + Study History
+            if (aiContext) {
+                aiContext = `[UPLOADED DOCUMENT CONTENT]:\n${aiContext}\n\n[STUDY LOG HISTORY]:\n${historyText}`;
+            } else {
+                aiContext = `[STUDY LOG HISTORY]:\n${historyText}`;
+            }
         }
 
         const result = await generateAIContent(type, aiContext, prompt);

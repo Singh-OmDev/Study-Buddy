@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 const StudyLogger = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { user } = useAuth(); // Get user from context
+    const { user, getToken } = useAuth(); // Get user from context
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
 
@@ -30,12 +30,15 @@ const StudyLogger = () => {
         }
         setLoading(true);
         try {
+            const token = await getToken();
             await axios.post('/api/study', {
                 subject,
                 topic,
                 durationMinutes: time,
                 notes,
                 confidenceLevel: confidence
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
             });
             navigate('/calendar');
         } catch (error) {

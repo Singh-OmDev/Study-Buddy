@@ -3,7 +3,10 @@ import axios from 'axios';
 import { Sparkles, MessageSquare, BookOpen, Copy, Check, Terminal, List, StickyNote, Lightbulb, History, X, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { useAuth } from '../context/AuthContext';
+
 const AIRevision = () => {
+    const { user, getToken } = useAuth();
     const [input, setInput] = useState('');
     const [result, setResult] = useState('');
     const [loading, setLoading] = useState(false);
@@ -15,8 +18,12 @@ const AIRevision = () => {
     const [history, setHistory] = useState([]);
 
     const fetchHistory = async () => {
+        if (!user) return;
         try {
-            const { data } = await axios.get('/api/ai/history');
+            const token = await getToken();
+            const { data } = await axios.get('/api/ai/history', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             setHistory(data);
         } catch (error) {
             console.error("Failed to fetch history", error);
@@ -26,15 +33,18 @@ const AIRevision = () => {
     // Fetch history on mount and when opening history
     useEffect(() => {
         fetchHistory();
-    }, []);
+    }, [user]);
 
     const handleGenerate = async () => {
         if (!input) return;
         setLoading(true);
         try {
+            const token = await getToken();
             const { data } = await axios.post('/api/ai/generate', {
                 type: mode,
                 context: input
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
             });
             setResult(data.result);
             fetchHistory(); // Refresh history after generation

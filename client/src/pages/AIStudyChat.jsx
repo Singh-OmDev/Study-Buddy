@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { Send, User, Bot, Sparkles, Terminal, Layers, Target, Lightbulb, Calendar as CalendarIcon, Search } from 'lucide-react';
+import { Send, User, Bot, Sparkles, Terminal, Layers, Target, Lightbulb, Calendar as CalendarIcon, Search, Paperclip, FileText } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useAuth } from '../context/AuthContext';
@@ -12,6 +12,9 @@ const AIStudyChat = () => {
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [fileContext, setFileContext] = useState('');
+    const fileInputRef = useRef(null);
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -21,6 +24,38 @@ const AIStudyChat = () => {
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
+
+    const handleFileSelect = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const token = await getToken();
+            const { data } = await axios.post('/api/upload', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            setFileContext(data.text);
+            setMessages(prev => [...prev, {
+                role: 'system',
+                content: `📄 **File Uploaded:** ${data.filename}\n\nI have read the document. You can now ask me questions about it.`
+            }]);
+        } catch (error) {
+            console.error("Upload failed", error);
+            alert("Failed to upload file. Please try again.");
+        } finally {
+            setIsUploading(false);
+            // Reset input so same file can be selected again if needed
+            e.target.value = '';
+        }
+    };
 
     const handleSend = async () => {
         if (!input.trim()) return;
@@ -34,7 +69,8 @@ const AIStudyChat = () => {
             const token = await getToken();
             const { data } = await axios.post('/api/ai/generate', {
                 type: 'chat',
-                prompt: input
+                prompt: input,
+                context: fileContext // Pass file context if available
             }, {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -170,6 +206,25 @@ const AIStudyChat = () => {
                 </div>
 
                 <div className="flex items-center gap-2 bg-[#0a0a0a] border border-[#262626] p-2 rounded-lg focus-within:border-zinc-500 transition-colors">
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileSelect}
+                        accept=".pdf,.txt"
+                        className="hidden"
+                    />
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        className="p-2 text-zinc-400 hover:text-white rounded-md hover:bg-[#1a1a1a] transition-colors"
+                        title="Upload PDF/Notes"
+                    >
+                        {isUploading ? (
+                            <div className="w-4 h-4 border-2 border-zinc-500 border-t-white rounded-full animate-spin"></div>
+                        ) : (
+                            <Paperclip className="h-4 w-4" />
+                        )}
+                    </button>
                     <input
                         type="text"
                         value={input}
