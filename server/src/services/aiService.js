@@ -49,12 +49,12 @@ export const generateAIContent = async (type, context, prompt = "") => {
         
         IMPORTANT FORMATTING RULES:
         - Use strict Markdown.
-        - Use **bold** for key terms and question titles.
-        - Use lists (- or 1.) for multiple points.
+        - Use **bold** for key terms.
+        - For Lists/Questions, leave a blank line between each item (e.g., Q1...\n\nQ2...).
         - Use newlines \n\n to separate paragraphs clearly.
         - If the user asks to "Quiz" or "Test" them:
             - Create 3 short conceptual questions based on their logs.
-            - Format them clearly (e.g., Q1: ...).
+            - Format each question as a separate block with a blank line in between.
             - Do not reveal answers immediately.
 
         Study Context:
