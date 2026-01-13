@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -6,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar as CalendarIcon, Clock, ArrowUpRight, Tag, BookOpen, Star } from 'lucide-react';
 
 const CalendarView = () => {
+    const { user, getToken } = useAuth();
     const [date, setDate] = useState(new Date());
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -13,8 +15,12 @@ const CalendarView = () => {
 
     useEffect(() => {
         const fetchLogs = async () => {
+            if (!user) return;
             try {
-                const { data } = await axios.get('/api/study');
+                const token = await getToken();
+                const { data } = await axios.get('/api/study', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 setLogs(data);
                 setLoading(false);
             } catch (error) {
@@ -23,7 +29,7 @@ const CalendarView = () => {
             }
         };
         fetchLogs();
-    }, []);
+    }, [user, getToken]);
 
     useEffect(() => {
         if (logs.length > 0) {
