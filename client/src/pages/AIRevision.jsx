@@ -166,17 +166,26 @@ const AIRevision = () => {
                     </div>
 
                     <div className="flex-1 bg-[#1a1a1a] p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-[#262626]">
-                        {result ? (
-                            mode === 'flashcards' && typeof result === 'object' && result.flashcards ? (
-                                <FlashcardPlayer cards={result.flashcards} />
+                        {result ? (() => {
+                            let parsedResult = result;
+                            if (mode === 'flashcards' && typeof result === 'string') {
+                                try {
+                                    parsedResult = JSON.parse(result);
+                                } catch (e) {
+                                    // Keep as string if parsing fails
+                                }
+                            }
+
+                            return mode === 'flashcards' && typeof parsedResult === 'object' && parsedResult.flashcards ? (
+                                <FlashcardPlayer cards={parsedResult.flashcards} />
                             ) : (
                                 <div className="prose prose-invert prose-sm max-w-none font-sans text-zinc-300">
                                     <pre className="whitespace-pre-wrap font-sans bg-transparent border-none p-0 m-0 text-sm leading-7">
                                         {typeof result === 'string' ? result : JSON.stringify(result, null, 2)}
                                     </pre>
                                 </div>
-                            )
-                        ) : (
+                            );
+                        })() : (
                             <div className="h-full flex flex-col items-center justify-center text-zinc-700 opacity-50">
                                 <Terminal className="h-12 w-12 mb-4" />
                                 <p className="text-sm font-mono">Waiting for input...</p>
@@ -265,49 +274,77 @@ const FlashcardPlayer = ({ cards }) => {
 
     const handleNext = () => {
         setFlipped(false);
-        setTimeout(() => setIndex((prev) => (prev + 1) % cards.length), 150);
+        setTimeout(() => setIndex((prev) => (prev + 1) % cards.length), 300);
     };
 
     const handlePrev = () => {
         setFlipped(false);
-        setTimeout(() => setIndex((prev) => (prev - 1 + cards.length) % cards.length), 150);
+        setTimeout(() => setIndex((prev) => (prev - 1 + cards.length) % cards.length), 300);
     };
 
     return (
         <div className="h-full flex flex-col items-center justify-center p-4">
-            <div className="w-full max-w-sm aspect-[3/2] relative perspective-1000 group cursor-pointer" onClick={() => setFlipped(!flipped)}>
+            <div className="w-full max-w-md aspect-[3/2] relative perspective-1000 group cursor-pointer" onClick={() => setFlipped(!flipped)}>
                 <motion.div
                     className="w-full h-full relative preserve-3d transition-all duration-500"
                     animate={{ rotateY: flipped ? 180 : 0 }}
+                    transition={{ type: "spring", stiffness: 260, damping: 20 }}
                 >
-                    {/* Front */}
-                    <div className="absolute inset-0 backface-hidden bg-[#262626] border border-zinc-700 rounded-xl flex flex-col items-center justify-center p-6 text-center shadow-lg">
-                        <span className="text-xs font-mono text-zinc-500 mb-2 uppercase tracking-widest">Question</span>
-                        <h3 className="text-xl font-bold text-white">{cards[index].front}</h3>
-                        <div className="absolute bottom-4 right-4 text-zinc-600">
-                            <RotateCw className="h-4 w-4" />
+                    {/* Front: Question */}
+                    <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-[#1a1a1a] to-[#262626] border border-zinc-700/50 rounded-2xl flex flex-col items-center justify-center p-8 text-center shadow-2xl shadow-black/50">
+                        <div className="absolute top-4 left-4">
+                            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-bold tracking-wider text-blue-400 uppercase">
+                                <Lightbulb className="w-3 h-3" /> Question
+                            </span>
+                        </div>
+                        <h3 className="text-2xl font-bold text-white leading-relaxed">{cards[index].front}</h3>
+
+                        <div className="absolute bottom-6 flex items-center gap-2 text-zinc-500 text-xs font-mono opacity-50 group-hover:opacity-100 transition-opacity">
+                            <RotateCw className="h-3 w-3" />
+                            Click to reveal
                         </div>
                     </div>
 
-                    {/* Back */}
-                    <div className="absolute inset-0 backface-hidden bg-[#0A0A0A] border border-zinc-600 rounded-xl flex flex-col items-center justify-center p-6 text-center shadow-xl rotate-y-180">
-                        <span className="text-xs font-mono text-green-500 mb-2 uppercase tracking-widest">Answer</span>
-                        <p className="text-lg text-zinc-200 leading-snug">{cards[index].back}</p>
+                    {/* Back: Answer */}
+                    <div className="absolute inset-0 backface-hidden bg-[#0F0F0F] border border-green-500/30 rounded-2xl flex flex-col items-center justify-center p-8 text-center shadow-2xl shadow-green-900/10 rotate-y-180 relative overflow-hidden">
+                        {/* Decorative Background Glow */}
+                        <div className="absolute inset-0 bg-green-500/5 pointer-events-none" />
+
+                        <div className="absolute top-4 left-4">
+                            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-[10px] font-bold tracking-wider text-green-400 uppercase">
+                                <Check className="w-3 h-3" /> Answer
+                            </span>
+                        </div>
+
+                        <p className="text-lg text-zinc-200 leading-7 font-medium z-10">{cards[index].back}</p>
                     </div>
                 </motion.div>
             </div>
 
             {/* Controls */}
-            <div className="flex items-center gap-6 mt-8">
-                <button onClick={handlePrev} className="p-2 rounded-full hover:bg-[#262626] text-zinc-400 hover:text-white transition-colors">
-                    <ChevronLeft className="h-6 w-6" />
-                </button>
-                <span className="font-mono text-sm text-zinc-500">
-                    {index + 1} / {cards.length}
-                </span>
-                <button onClick={handleNext} className="p-2 rounded-full hover:bg-[#262626] text-zinc-400 hover:text-white transition-colors">
-                    <ChevronRight className="h-6 w-6" />
-                </button>
+            <div className="flex flex-col items-center gap-4 mt-8 w-full max-w-xs">
+                {/* Progress Bar */}
+                <div className="w-full h-1 bg-[#262626] rounded-full overflow-hidden">
+                    <motion.div
+                        className="h-full bg-white"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${((index + 1) / cards.length) * 100}%` }}
+                    />
+                </div>
+
+                <div className="flex items-center justify-between w-full">
+                    <button onClick={handlePrev} className="p-3 rounded-full hover:bg-[#262626] text-zinc-400 hover:text-white transition-all active:scale-95">
+                        <ChevronLeft className="h-5 w-5" />
+                    </button>
+
+                    <span className="font-mono text-xs text-zinc-500 tracking-widest">
+                        CARD {index + 1} OF {cards.length}
+                    </span>
+
+                    <button onClick={handleNext} className="p-3 rounded-full hover:bg-[#262626] text-zinc-400 hover:text-white transition-all active:scale-95">
+                        <ChevronRight className="h-5 w-5" />
+                    </button>
+                </div>
             </div>
         </div>
     );

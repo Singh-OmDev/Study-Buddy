@@ -6,6 +6,10 @@ const chatSessionSchema = mongoose.Schema({
         ref: 'User',
         required: true
     },
+    title: {
+        type: String,
+        default: 'New Chat'
+    },
     messages: [{
         role: { type: String, enum: ['user', 'assistant', 'system'], required: true },
         content: { type: String, required: true },
