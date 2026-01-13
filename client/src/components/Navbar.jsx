@@ -28,6 +28,7 @@ const Navbar = () => {
                         <>
                             <div className="hidden md:flex items-center space-x-1">
                                 <NavLink to="/features" text="Features" icon={Zap} />
+                                 <NavLink to="/log" text="Logger" icon={BookOpen} />
                                 <NavLink to="/dashboard" text="Dashboard" icon={BarChart2} />
                                 <NavLink to="/log" text="Logger" icon={BookOpen} />
                                 <NavLink to="/focus" text="Focus" icon={Brain} />
