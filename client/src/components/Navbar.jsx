@@ -1,6 +1,7 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BookOpen, BarChart2, Brain, LogOut, Calendar, Sparkles, MessageSquare, Zap, User } from 'lucide-react';
+import { BookOpen, BarChart2, Brain, LogOut, Calendar, Sparkles, MessageSquare, Zap, User, Menu, X } from 'lucide-react';
 import { UserButton } from '@clerk/clerk-react';
 
 const Navbar = () => {
@@ -10,6 +11,13 @@ const Navbar = () => {
     // Don't show Navbar on Login/Register pages usually, or maybe yes? 
     // Let's hide it on Login/Register for cleaner look if we want, but keeping it is also fine.
     // Actually, user explicitly asked for landing page. Navbar on landing page is good.
+
+    const [isOpen, setIsOpen] = useState(false);
+
+    // Close mobile menu when route changes
+    useEffect(() => {
+        setIsOpen(false);
+    }, [location.pathname]);
 
     return (
         <nav className="bg-[#0a0a0a] border-b border-[#262626] sticky top-0 z-50">
@@ -26,6 +34,7 @@ const Navbar = () => {
 
                     {user ? (
                         <>
+                            {/* Desktop Menu */}
                             <div className="hidden md:flex items-center space-x-1">
                                 <NavLink to="/features" text="Features" icon={Zap} />
                                 <NavLink to="/log" text="Logger" icon={BookOpen} />
@@ -36,13 +45,25 @@ const Navbar = () => {
                                 <NavLink to="/ai-revision" text="AI Tools" icon={Sparkles} />
                             </div>
 
-                            <div className="flex items-center ml-4">
-                                <UserButton afterSignOutUrl="/" />
+                            <div className="flex items-center gap-4">
+                                <div className="hidden md:block">
+                                    <UserButton afterSignOutUrl="/" />
+                                </div>
+                                {/* Mobile Menu Button */}
+                                <div className="md:hidden flex items-center">
+                                    <UserButton afterSignOutUrl="/" /> {/* Show avatar on mobile too */}
+                                    <button
+                                        onClick={() => setIsOpen(!isOpen)}
+                                        className="ml-4 p-2 rounded-md text-zinc-400 hover:text-white hover:bg-[#262626] focus:outline-none"
+                                    >
+                                        {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                                    </button>
+                                </div>
                             </div>
                         </>
                     ) : (
                         <div className="flex items-center space-x-4">
-                            <Link to="/features" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
+                            <Link to="/features" className="hidden sm:block text-sm font-medium text-zinc-400 hover:text-white transition-colors">
                                 Features
                             </Link>
 
@@ -56,6 +77,21 @@ const Navbar = () => {
                     )}
                 </div>
             </div>
+
+            {/* Mobile Menu Dropdown */}
+            {isOpen && user && (
+                <div className="md:hidden bg-[#0a0a0a] border-b border-[#262626]">
+                    <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                        <MobileNavLink to="/features" text="Features" icon={Zap} />
+                        <MobileNavLink to="/log" text="Logger" icon={BookOpen} />
+                        <MobileNavLink to="/dashboard" text="Dashboard" icon={BarChart2} />
+                        <MobileNavLink to="/focus" text="Focus" icon={Brain} />
+                        <MobileNavLink to="/calendar" text="Calendar" icon={Calendar} />
+                        <MobileNavLink to="/chat" text="Chat" icon={MessageSquare} />
+                        <MobileNavLink to="/ai-revision" text="AI Tools" icon={Sparkles} />
+                    </div>
+                </div>
+            )}
         </nav>
     );
 };
@@ -77,5 +113,22 @@ const NavLink = ({ to, text, icon: Icon }) => {
         </Link>
     );
 }
+const MobileNavLink = ({ to, text, icon: Icon }) => {
+    const location = useLocation();
+    const isActive = location.pathname === to;
+
+    return (
+        <Link
+            to={to}
+            className={`block px-3 py-2 rounded-md text-base font-medium flex items-center space-x-3 transition-colors ${isActive
+                ? 'text-white bg-[#262626]'
+                : 'text-zinc-400 hover:text-white hover:bg-[#1a1a1a]'
+                }`}
+        >
+            {Icon && <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-zinc-400'}`} />}
+            <span>{text}</span>
+        </Link>
+    );
+};
 
 export default Navbar;
