@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { Check, ChevronRight, Clock, BookOpen, AlertCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const StudyLogger = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { user } = useAuth(); // Get user from context
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
 
@@ -22,6 +24,10 @@ const StudyLogger = () => {
     ];
 
     const handleSubmit = async () => {
+        if (!user) {
+            alert("You must be logged in to save logs.");
+            return;
+        }
         setLoading(true);
         try {
             await axios.post('/api/study', {

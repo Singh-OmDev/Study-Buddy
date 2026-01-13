@@ -24,6 +24,7 @@ const Dashboard = () => {
 
     useEffect(() => {
         const fetchStats = async () => {
+            if (!user) return; // Wait for user to be loaded
             try {
                 const { data } = await axios.get('/api/study/stats');
                 setStats(data);
@@ -35,7 +36,7 @@ const Dashboard = () => {
         };
 
         fetchStats();
-    }, []);
+    }, [user]);
 
     if (loading) return (
         <div className="flex h-[50vh] items-center justify-center text-zinc-500 font-mono text-sm">
