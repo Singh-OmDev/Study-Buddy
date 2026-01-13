@@ -28,14 +28,13 @@ const Navbar = () => {
                         <>
                             <div className="hidden md:flex items-center space-x-1">
                                 <NavLink to="/features" text="Features" icon={Zap} />
-                                 <NavLink to="/log" text="Logger" icon={BookOpen} />
-                                <NavLink to="/dashboard" text="Dashboard" icon={BarChart2} />
                                 <NavLink to="/log" text="Logger" icon={BookOpen} />
+                                <NavLink to="/dashboard" text="Dashboard" icon={BarChart2} />
                                 <NavLink to="/focus" text="Focus" icon={Brain} />
                                 <NavLink to="/calendar" text="Calendar" icon={Calendar} />
                                 <NavLink to="/chat" text="Chat" icon={MessageSquare} />
                                 <NavLink to="/ai-revision" text="AI Tools" icon={Sparkles} />
-                                <NavLink to="/profile" text="My Profile" icon={User} />
+                                <NavLink to="/ai-revision" text="AI Tools" icon={Sparkles} />
                             </div>
 
                             <div className="flex items-center ml-4">
