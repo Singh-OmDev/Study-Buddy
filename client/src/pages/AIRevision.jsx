@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Sparkles, MessageSquare, BookOpen, Copy, Check, Terminal, List, StickyNote, Lightbulb, History, X, Clock } from 'lucide-react';
+import { Sparkles, MessageSquare, BookOpen, Copy, Check, Terminal, List, StickyNote, Lightbulb, History, X, Clock, ChevronLeft, ChevronRight, RotateCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useAuth } from '../context/AuthContext';
@@ -167,11 +167,15 @@ const AIRevision = () => {
 
                     <div className="flex-1 bg-[#1a1a1a] p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-[#262626]">
                         {result ? (
-                            <div className="prose prose-invert prose-sm max-w-none font-sans text-zinc-300">
-                                <pre className="whitespace-pre-wrap font-sans bg-transparent border-none p-0 m-0 text-sm leading-7">
-                                    {result}
-                                </pre>
-                            </div>
+                            mode === 'flashcards' && typeof result === 'object' && result.flashcards ? (
+                                <FlashcardPlayer cards={result.flashcards} />
+                            ) : (
+                                <div className="prose prose-invert prose-sm max-w-none font-sans text-zinc-300">
+                                    <pre className="whitespace-pre-wrap font-sans bg-transparent border-none p-0 m-0 text-sm leading-7">
+                                        {typeof result === 'string' ? result : JSON.stringify(result, null, 2)}
+                                    </pre>
+                                </div>
+                            )
                         ) : (
                             <div className="h-full flex flex-col items-center justify-center text-zinc-700 opacity-50">
                                 <Terminal className="h-12 w-12 mb-4" />
@@ -250,6 +254,62 @@ const AIRevision = () => {
                 )}
             </AnimatePresence>
         </div >
+    );
+};
+
+const FlashcardPlayer = ({ cards }) => {
+    const [index, setIndex] = useState(0);
+    const [flipped, setFlipped] = useState(false);
+
+    if (!cards || cards.length === 0) return <p>No flashcards generated.</p>;
+
+    const handleNext = () => {
+        setFlipped(false);
+        setTimeout(() => setIndex((prev) => (prev + 1) % cards.length), 150);
+    };
+
+    const handlePrev = () => {
+        setFlipped(false);
+        setTimeout(() => setIndex((prev) => (prev - 1 + cards.length) % cards.length), 150);
+    };
+
+    return (
+        <div className="h-full flex flex-col items-center justify-center p-4">
+            <div className="w-full max-w-sm aspect-[3/2] relative perspective-1000 group cursor-pointer" onClick={() => setFlipped(!flipped)}>
+                <motion.div
+                    className="w-full h-full relative preserve-3d transition-all duration-500"
+                    animate={{ rotateY: flipped ? 180 : 0 }}
+                >
+                    {/* Front */}
+                    <div className="absolute inset-0 backface-hidden bg-[#262626] border border-zinc-700 rounded-xl flex flex-col items-center justify-center p-6 text-center shadow-lg">
+                        <span className="text-xs font-mono text-zinc-500 mb-2 uppercase tracking-widest">Question</span>
+                        <h3 className="text-xl font-bold text-white">{cards[index].front}</h3>
+                        <div className="absolute bottom-4 right-4 text-zinc-600">
+                            <RotateCw className="h-4 w-4" />
+                        </div>
+                    </div>
+
+                    {/* Back */}
+                    <div className="absolute inset-0 backface-hidden bg-[#0A0A0A] border border-zinc-600 rounded-xl flex flex-col items-center justify-center p-6 text-center shadow-xl rotate-y-180">
+                        <span className="text-xs font-mono text-green-500 mb-2 uppercase tracking-widest">Answer</span>
+                        <p className="text-lg text-zinc-200 leading-snug">{cards[index].back}</p>
+                    </div>
+                </motion.div>
+            </div>
+
+            {/* Controls */}
+            <div className="flex items-center gap-6 mt-8">
+                <button onClick={handlePrev} className="p-2 rounded-full hover:bg-[#262626] text-zinc-400 hover:text-white transition-colors">
+                    <ChevronLeft className="h-6 w-6" />
+                </button>
+                <span className="font-mono text-sm text-zinc-500">
+                    {index + 1} / {cards.length}
+                </span>
+                <button onClick={handleNext} className="p-2 rounded-full hover:bg-[#262626] text-zinc-400 hover:text-white transition-colors">
+                    <ChevronRight className="h-6 w-6" />
+                </button>
+            </div>
+        </div>
     );
 };
 

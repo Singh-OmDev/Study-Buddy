@@ -21,6 +21,33 @@ const AIStudyChat = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
+    // Fetch Chat History
+    useEffect(() => {
+        if (!user) return;
+
+        const fetchChatHistory = async () => {
+            try {
+                const token = await getToken();
+                const { data } = await axios.get('/api/ai/history/chat', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (data && data.length > 0) {
+                    // Normalize history to match UI format
+                    const history = data.map(msg => ({
+                        role: msg.role,
+                        content: msg.content
+                    }));
+                    setMessages(history);
+                }
+            } catch (error) {
+                console.error("Failed to load chat history", error);
+            }
+        };
+
+        fetchChatHistory();
+    }, [user]);
+
     useEffect(() => {
         scrollToBottom();
     }, [messages]);

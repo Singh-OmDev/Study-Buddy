@@ -1,6 +1,7 @@
 import { generateAIContent } from '../services/aiService.js';
 import StudyLog from '../models/StudyLog.js';
 import AIHistory from '../models/AIHistory.js';
+import ChatSession from '../models/ChatSession.js';
 
 const generateContent = async (req, res) => {
     const { type, prompt, context } = req.body;
@@ -31,12 +32,33 @@ const generateContent = async (req, res) => {
             }
         }
 
+        // Save User Message to Chat History (if chat)
+        if (type === 'chat') {
+            await ChatSession.findOneAndUpdate(
+                { user: req.user._id },
+                {
+                    $push: { messages: { role: 'user', content: prompt } },
+                    $set: { lastActive: Date.now() }
+                },
+                { upsert: true, new: true }
+            );
+        }
+
         const result = await generateAIContent(type, aiContext, prompt);
 
         const finalResult = typeof result === 'string' ? result : JSON.stringify(result);
 
-        // Save to History (skip chat for now as it's ephemeral usually, or save it too if desired)
-        if (type !== 'chat') {
+        // Save AI Response to History
+        if (type === 'chat') {
+            await ChatSession.findOneAndUpdate(
+                { user: req.user._id },
+                {
+                    $push: { messages: { role: 'assistant', content: finalResult } },
+                    $set: { lastActive: Date.now() }
+                }
+            );
+        } else {
+            // Save to Standard AI History (Flashcards, etc.)
             await AIHistory.create({
                 user: req.user._id,
                 type,
@@ -65,4 +87,13 @@ const getHistory = async (req, res) => {
     }
 };
 
-export { generateContent, getHistory };
+const getChatHistory = async (req, res) => {
+    try {
+        const session = await ChatSession.findOne({ user: req.user._id });
+        res.json(session ? session.messages : []);
+    } catch (error) {
+        res.status(500).json({ message: "Failed to fetch chat history" });
+    }
+};
+
+export { generateContent, getHistory, getChatHistory };

@@ -28,8 +28,11 @@ export const generateAIContent = async (type, context, prompt = "") => {
         systemPrompt = "You are an expert note-taker. Extract the most critical key points/facts as a bulleted list.";
         userPrompt = `Extract key points from these notes:\n\n${context}`;
     } else if (type === 'flashcards') {
-        systemPrompt = "You are a studying assistant. Create 5 Flashcards from the content. Format as 'Concept: Definition'.";
-        userPrompt = `Generate 5 Flashcards (Term: Definition) based on:\n\n${context}`;
+        systemPrompt = `You are a studying assistant. Create 5 Flashcards from the content.
+        Return a JSON object with a "flashcards" key containing an array of objects.
+        Each object must have "front" and "back" keys.
+        Example: { "flashcards": [{ "front": "Term", "back": "Definition" }] }`;
+        userPrompt = `Generate 5 Flashcards based on:\n\n${context}`;
     } else if (type === 'explanation') {
         systemPrompt = "You are a tutor engaging with a student. Explain the following content simply (ELI5 style) with an analogy if possible.";
         userPrompt = `Explain this concept simply:\n\n${context}`;
@@ -76,12 +79,12 @@ export const generateAIContent = async (type, context, prompt = "") => {
             model: "llama-3.1-8b-instant",
             temperature: 0.5,
             max_tokens: 1024,
-            response_format: type === 'analysis' ? { type: "json_object" } : { type: "text" }
+            response_format: (type === 'analysis' || type === 'flashcards') ? { type: "json_object" } : { type: "text" }
         });
 
         const content = completion.choices[0]?.message?.content;
 
-        if (type === 'analysis') {
+        if (type === 'analysis' || type === 'flashcards') {
             return JSON.parse(content);
         }
 
