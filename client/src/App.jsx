@@ -53,7 +53,7 @@ function AppRoutes() {
           {/* Auth Routes - Centered */}
           {/* We mount Clerk's components here so /login is a valid route */}
           <Route path="/login/*" element={<div className="flex justify-center items-center mt-20"><SignIn routing="path" path="/login" signUpUrl="/register" fallbackRedirectUrl="/dashboard" /></div>} />
-          <Route path="/register/*" element={<div className="flex justify-center items-center mt-20"><SignUp routing="path" path="/register" signInUrl="/login" fallbackRedirectUrl="/dashboard" /></div>} />
+          <Route path="/register/*" element={<div className="flex justify-center items-center mt-20"><SignUp routing="path" path="/register" signInUrl="/login" fallbackRedirectUrl="/log" /></div>} />
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
@@ -96,7 +96,7 @@ function App() {
       signInUrl="/login"
       signUpUrl="/register"
       signInFallbackRedirectUrl="/dashboard"
-      signUpFallbackRedirectUrl="/dashboard"
+      signUpFallbackRedirectUrl="/log"
     >
       <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <AuthProvider>
