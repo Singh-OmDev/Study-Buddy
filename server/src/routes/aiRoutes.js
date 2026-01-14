@@ -5,7 +5,6 @@ import {
     getChatHistory,
     createSession,
     getAllSessions,
-    getAllSessions,
     getSessionById,
     deleteSession
 } from '../controllers/aiController.js';
