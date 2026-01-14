@@ -79,12 +79,24 @@ const generateContent = async (req, res) => {
                 }
             );
 
-            // Auto-update title if it's "New Chat" (First message)
+            // Smart Title Generation for New Chats
             const session = await ChatSession.findById(sessionId);
             if (session && session.title === 'New Chat') {
-                const newTitle = prompt.split(' ').slice(0, 5).join(' ') + '...';
-                session.title = newTitle;
-                await session.save();
+                try {
+                    // Ask AI for a concise title based on the first prompt
+                    const titlePrompt = `Generate a very short, concise topic title (max 5 words) for this chat based on this user message: "${prompt}". Do not use quotes.`;
+                    const generatedTitle = await generateAIContent('chat', '', titlePrompt);
+
+                    // Clean up title (remove quotes if any, trim)
+                    const cleanTitle = generatedTitle.replace(/^"|"$/g, '').trim().substring(0, 30);
+                    session.title = cleanTitle || 'New Chat';
+                    await session.save();
+                } catch (titleError) {
+                    console.error("Failed to generate smart title:", titleError);
+                    // Fallback to truncation
+                    session.title = prompt.split(' ').slice(0, 5).join(' ') + '...';
+                    await session.save();
+                }
             }
         }
 
