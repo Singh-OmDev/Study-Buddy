@@ -78,7 +78,7 @@ const AIStudyChat = () => {
             });
             setSessions(prev => [data, ...prev]);
             setCurrentSessionId(data._id);
-            setMessages([{ role: 'assistant', content: `Hello ${user.name || 'Agent Stark'}. I have access to your study logs. How can I assist you today?` }]);
+            setMessages(data.messages);
         } catch (error) {
             console.error("Failed to create new session", error);
         }

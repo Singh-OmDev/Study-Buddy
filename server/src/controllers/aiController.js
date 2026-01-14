@@ -7,7 +7,12 @@ const createSession = async (req, res) => {
     try {
         const session = await ChatSession.create({
             user: req.user._id,
-            title: 'New Chat'
+            title: 'New Chat',
+            messages: [{
+                role: 'assistant',
+                content: `Hello ${req.user.name || 'Agent Stark'}. I have access to your study logs. How can I assist you today?`,
+                createdAt: new Date()
+            }]
         });
         res.json(session);
     } catch (error) {
