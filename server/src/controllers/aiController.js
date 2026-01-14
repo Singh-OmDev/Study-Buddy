@@ -150,4 +150,18 @@ const getChatHistory = async (req, res) => {
     }
 };
 
-export { generateContent, getHistory, getChatHistory, createSession, getAllSessions, getSessionById };
+const deleteSession = async (req, res) => {
+    try {
+        const session = await ChatSession.findOneAndDelete({
+            _id: req.params.id,
+            user: req.user._id
+        });
+        if (!session) return res.status(404).json({ message: "Session not found" });
+        res.json({ message: "Session deleted successfully" });
+    } catch (error) {
+        console.error("deleteSession Error:", error);
+        res.status(500).json({ message: "Failed to delete session" });
+    }
+};
+
+export { generateContent, getHistory, getChatHistory, createSession, getAllSessions, getSessionById, deleteSession };

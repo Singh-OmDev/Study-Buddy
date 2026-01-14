@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { Send, User, Bot, Sparkles, Terminal, Layers, Target, Lightbulb, Calendar as CalendarIcon, Search, Paperclip, FileText } from 'lucide-react';
+import { Send, User, Bot, Sparkles, Terminal, Layers, Target, Lightbulb, Calendar as CalendarIcon, Search, Paperclip, FileText, Trash2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useAuth } from '../context/AuthContext';
@@ -26,7 +26,6 @@ const AIStudyChat = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    // 1. Fetch Session List on Mount
     const fetchSessions = async () => {
         try {
             const token = await getToken();
@@ -35,7 +34,6 @@ const AIStudyChat = () => {
             });
             setSessions(data);
 
-            // If explicit session provided (future) or just load first
             if (data.length > 0 && !currentSessionId) {
                 loadSession(data[0]._id);
             } else if (data.length === 0) {
@@ -50,7 +48,6 @@ const AIStudyChat = () => {
         if (user) fetchSessions();
     }, [user]);
 
-    // 2. Load Specific Session
     const loadSession = async (sessionId) => {
         setLoading(true);
         setCurrentSessionId(sessionId);
@@ -60,7 +57,6 @@ const AIStudyChat = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            // Normalize messages
             if (data && data.messages) {
                 setMessages(data.messages.map(m => ({ role: m.role, content: m.content })));
             } else {
@@ -73,7 +69,7 @@ const AIStudyChat = () => {
         }
     };
 
-    // 3. Create New Session
+
     const createNewSession = async () => {
         try {
             const token = await getToken();
@@ -85,6 +81,29 @@ const AIStudyChat = () => {
             setMessages([{ role: 'assistant', content: `Hello ${user.name || 'Agent Stark'}. I have access to your study logs. How can I assist you today?` }]);
         } catch (error) {
             console.error("Failed to create new session", error);
+        }
+    };
+
+    const deleteSessionHandler = async (e, sessionId) => {
+        e.stopPropagation();
+        if (!window.confirm("Are you sure you want to delete this chat?")) return;
+
+        try {
+            const token = await getToken();
+            await axios.delete(`/api/ai/chat/${sessionId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            setSessions(prev => prev.filter(s => s._id !== sessionId));
+
+            if (currentSessionId === sessionId) {
+                setCurrentSessionId(null);
+                setMessages([]);
+                // Optionally create new session if list empty, but cleaner to just clear for now
+            }
+        } catch (error) {
+            console.error("Failed to delete session", error);
+            alert("Failed to delete session.");
         }
     };
 
@@ -119,7 +138,6 @@ const AIStudyChat = () => {
             alert("Failed to upload file. Please try again.");
         } finally {
             setIsUploading(false);
-            // Reset input so same file can be selected again if needed
             e.target.value = '';
         }
     };
@@ -184,16 +202,24 @@ const AIStudyChat = () => {
                 </div>
                 <div className="flex-1 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-[#262626]">
                     {sessions.map(session => (
-                        <button
-                            key={session._id}
-                            onClick={() => loadSession(session._id)}
-                            className={`w-full text-left p-3 rounded-lg text-sm mb-1 transition-colors truncate ${currentSessionId === session._id
-                                ? 'bg-[#262626] text-white'
-                                : 'text-zinc-400 hover:bg-[#1a1a1a] hover:text-zinc-200'
-                                }`}
-                        >
-                            {session.title || "New Chat"}
-                        </button>
+                        <div key={session._id} className="group relative flex items-center mb-1">
+                            <button
+                                onClick={() => loadSession(session._id)}
+                                className={`w-full text-left p-3 pr-8 rounded-lg text-sm transition-colors truncate ${currentSessionId === session._id
+                                    ? 'bg-[#262626] text-white'
+                                    : 'text-zinc-400 hover:bg-[#1a1a1a] hover:text-zinc-200'
+                                    }`}
+                            >
+                                {session.title || "New Chat"}
+                            </button>
+                            <button
+                                onClick={(e) => deleteSessionHandler(e, session._id)}
+                                className="absolute right-2 p-1.5 text-zinc-500 hover:text-red-500 hover:bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-all"
+                                title="Delete Chat"
+                            >
+                                <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                        </div>
                     ))}
                 </div>
             </div>
