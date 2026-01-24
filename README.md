@@ -1,10 +1,11 @@
 # AI Study Buddy 🧠📚
+ live demo https://ai-study-buddy-inky.vercel.app/
 
 A full-stack, AI-powered study assistant designed to optimize learning retention through smart scheduling, personalized AI feedback, and immersive focus tools.
+<img width="1909" height="847" alt="image" src="https://github.com/user-attachments/assets/525adbc5-ade7-48b3-a431-7e25e7cc60af" />
 
-![Project Status](https://img.shields.io/badge/Status-Production--Ready-green)
-![Tech Stack](https://img.shields.io/badge/Stack-MERN-blue)
-![License](https://img.shields.io/badge/License-MIT-purple)
+
+
 
 ## 🚀 Key Features
 
