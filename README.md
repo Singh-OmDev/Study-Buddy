@@ -1,4 +1,4 @@
-# AI Study Buddy 🧠📚
+#  Study Buddy 🧠📚
  live demo https://ai-study-buddy-inky.vercel.app/
 
 A full-stack, AI-powered study assistant designed to optimize learning retention through smart scheduling, personalized AI feedback, and immersive focus tools.
