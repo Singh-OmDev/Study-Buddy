@@ -1,9 +1,5 @@
-#  Study Buddy 🧠📚
- live demo https://ai-study-buddy-inky.vercel.app/
-
-A full-stack, AI-powered study assistant designed to optimize learning retention through smart scheduling, personalized AI feedback, and immersive focus tools.
-<img width="1909" height="847" alt="image" src="https://github.com/user-attachments/assets/525adbc5-ade7-48b3-a431-7e25e7cc60af" />
-
+# AI Study Buddy 🧠📚
+[Live Demo](https://ai-study-buddy-inky.vercel.app/)
 
 A full-stack, AI-powered study assistant designed to optimize learning retention through smart scheduling, personalized AI feedback, and immersive focus tools.
 
@@ -11,13 +7,19 @@ A full-stack, AI-powered study assistant designed to optimize learning retention
 ![Tech Stack](https://img.shields.io/badge/Stack-MERN-blue)
 ![License](https://img.shields.io/badge/License-MIT-purple)
 
+<img width="100%" alt="AI Study Buddy Dashboard" src="https://github.com/user-attachments/assets/525adbc5-ade7-48b3-a431-7e25e7cc60af" />
+
 ## 🚀 Key Features
 
 ### 🤖 Advanced AI Integration
 - **AI Study Chat (RAG)**: Context-aware chat that helps you answer questions based on your study history and notes.
-- **Auto-Summarization**: Instantly generates concise summaries of your inputs and study materials.
+- **Auto-Summarization**: Instantly generates concise summaries of your inputs and study materials using advanced LLMs (Groq).
 - **Smart Quiz Generator**: Automatically creates revision questions to test your knowledge.
 - **AI Revision**: Dedicated tools to review and reinforce concepts using AI-driven insights.
+
+### ⚡ Performance & Scalability
+- **Hybrid Redis Caching**: Implements a robust caching strategy that seamlessly switches between **Local Redis (Docker)** for development and **Upstash Redis (Serverless)** for production.
+- **Optimized API**: Reduces database load by caching heavy aggregations (User Stats, Streaks) with invalidation on updates.
 
 ### 📅 Smart Scheduling & Analytics
 - **Visual Calendar**: Track your study consistency with an interactive contribution graph.
@@ -46,13 +48,16 @@ A full-stack, AI-powered study assistant designed to optimize learning retention
 - **Charts**: Recharts
 - **Calendar**: React-Calendar
 - **Auth**: @clerk/clerk-react
+- **Testing**: Vitest + React Testing Library
 
 ### Backend
 - **Runtime**: Node.js
 - **Framework**: Express.js
 - **Database**: MongoDB (Mongoose)
+- **Caching**: Redis (Upstash / ioredis)
 - **AI Integration**: OpenAI SDK (configured for Groq API)
 - **Auth**: @clerk/clerk-sdk-node
+- **Testing**: Jest
 - **Utilities**: PDF Parse, Multer (File Uploads)
 
 ---
@@ -64,12 +69,13 @@ Follow these steps to set up the project locally.
 ### Prerequisites
 - Node.js (v18 or higher recommended)
 - MongoDB (Local or Atlas URI)
+- Redis (Optional, for caching - Local or Upstash)
 - Groq/OpenAI API Key
 - Clerk Account (for Authentication)
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/ai-study-buddy.git
+git clone https://github.com/Singh-OmDev/AI-Study-Buddy.git
 cd ai-study-buddy
 ```
 
@@ -86,7 +92,11 @@ PORT=5000
 MONGO_URI=mongodb://localhost:27017/ai_study_buddy
 GROQ_API_KEY=your_groq_api_key
 CLERK_SECRET_KEY=your_clerk_secret_key
-# Add any other required backend keys
+CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+# Optional: Redis Configuration (Leave blank for generic fallback or Local Redis)
+# UPSTASH_REDIS_REST_URL=...
+# UPSTASH_REDIS_REST_TOKEN=...
+# REDIS_URI=redis://localhost:6379
 ```
 
 Start the backend server:
@@ -115,9 +125,27 @@ Visit `http://localhost:5173` to view the application.
 
 ---
 
+## 🧪 Running Tests
+
+We use **Vitest** for the frontend and **Jest** for the backend.
+
+### Frontend Tests
+```bash
+cd client
+npm test
+```
+
+### Backend Tests
+```bash
+cd server
+npm test
+```
+
+---
+
 ## 📸 Screenshots
 
-*(Placeholder: Add screenshots of Dashboard, Chat, and Zen Mode here)*
+*(Add screenshots of Dashboard, Chat, and Zen Mode here)*
 
 ## 🤝 Contributing
 
