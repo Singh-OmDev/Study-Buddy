@@ -1,5 +1,6 @@
 import StudyLog from '../models/StudyLog.js';
 import { generateAIContent } from '../services/aiService.js';
+import redis from '../config/redis.js';
 
 // @desc    Create new study log
 // @route   POST /api/study
@@ -66,6 +67,9 @@ const createStudyLog = async (req, res) => {
             ...aiData
         });
 
+        if (redis.status !== 'disabled') {
+            await redis.del(`stats:${req.user._id}`);
+        }
         res.status(201).json(studyLog);
     } catch (error) {
         console.error("Create Study Log Error:", error);
@@ -90,6 +94,18 @@ const getStudyLogs = async (req, res) => {
 // @access Private
 const getStats = async (req, res) => {
     try {
+        const cacheKey = `stats:${req.user._id}`;
+
+        // Try to fetch from cache
+        if (redis.status !== 'disabled') {
+            const cachedData = await redis.get(cacheKey);
+            if (cachedData) {
+                console.log("Serving stats from Redis Cache");
+                // Upstash Redis returns object directly, ioredis returns string
+                return res.json(typeof cachedData === 'string' ? JSON.parse(cachedData) : cachedData);
+            }
+        }
+
         const logs = await StudyLog.find({ user: req.user._id });
 
         const totalMinutes = logs.reduce((acc, log) => acc + log.durationMinutes, 0);
@@ -133,13 +149,25 @@ const getStats = async (req, res) => {
 
         const recentLogs = logs.slice(-5).reverse();
 
-        res.json({
+        const responseData = {
             totalLogs: logs.length,
             totalHours,
             subjectStats,
             streak,
             recentLogs
-        });
+        };
+
+        // Save to cache
+        if (redis.status !== 'disabled') {
+            // Upstash (HTTP) uses .set(key, val, { ex: s }), ioredis uses .setex(key, s, val)
+            if (typeof redis.setex === 'function') {
+                await redis.setex(cacheKey, 3600, JSON.stringify(responseData));
+            } else {
+                await redis.set(cacheKey, responseData, { ex: 3600 });
+            }
+        }
+
+        res.json(responseData);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -162,6 +190,11 @@ const deleteStudyLog = async (req, res) => {
         }
 
         await log.deleteOne();
+
+        if (redis.status !== 'disabled') {
+            await redis.del(`stats:${req.user._id}`);
+        }
+
         res.json({ message: 'Study log removed' });
     } catch (error) {
         res.status(500).json({ message: error.message });

@@ -1,7 +1,7 @@
 import multer from 'multer';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-const pdf = require('pdf-parse');
+const pdf = require('pdf-parse/lib/pdf-parse.js');
 
 // Configure Multer to store in memory
 const storage = multer.memoryStorage();
