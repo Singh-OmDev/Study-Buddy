@@ -115,34 +115,39 @@ const CalendarView = () => {
                                     initial={{ opacity: 0, x: 10 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0 }}
-                                    className="bento-card p-5 group hover:border-zinc-500"
+                                    className="bento-card p-6 group hover:border-zinc-400 transition-all duration-200"
                                 >
-                                    <div className="flex justify-between items-start mb-3">
-                                        <h3 className="font-bold text-white text-base">{log.subject}</h3>
+                                    {/* Header with Subject and Difficulty */}
+                                    <div className="flex justify-between items-start mb-4">
+                                        <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">{log.subject}</span>
                                         <div className="flex gap-2">
                                             {log.difficultyLevel && (
-                                                <span className="text-[10px] font-mono px-2 py-0.5 border border-[#262626] rounded text-zinc-400 capitalize bg-[#0a0a0a]">
+                                                <span className="text-xs px-2.5 py-1 border border-[#262626] rounded-md text-zinc-300 capitalize bg-[#0a0a0a]">
                                                     {log.difficultyLevel}
                                                 </span>
                                             )}
                                         </div>
                                     </div>
-                                    <p className="text-zinc-400 font-medium text-sm mb-4">{log.topic}</p>
 
+                                    {/* Topic - Main Focus */}
+                                    <h3 className="text-white font-semibold text-lg mb-4 leading-snug">{log.topic}</h3>
+
+                                    {/* AI Summary */}
                                     {log.aiSummary && (
-                                        <div className="bg-[#1a1a1a] p-3 rounded-lg text-xs text-zinc-500 border border-[#262626] mb-4 font-mono leading-relaxed">
+                                        <div className="bg-[#0a0a0a] p-4 rounded-xl text-sm text-zinc-300 border border-[#1a1a1a] mb-4 leading-relaxed">
                                             {log.aiSummary}
                                         </div>
                                     )}
 
-                                    <div className="flex items-center justify-between text-xs text-zinc-600 border-t border-[#262626] pt-3 mt-2">
-                                        <span className="flex items-center">
-                                            <Clock className="h-3 w-3 mr-1.5" />
-                                            {log.durationMinutes}m
+                                    {/* Metadata Footer */}
+                                    <div className="flex items-center gap-4 text-sm text-zinc-400 pt-4 border-t border-[#1a1a1a]">
+                                        <span className="flex items-center gap-2">
+                                            <Clock className="h-4 w-4" />
+                                            <span className="font-medium">{log.durationMinutes}m</span>
                                         </span>
-                                        <span className="flex items-center">
-                                            <Star className="h-3 w-3 mr-1.5" />
-                                            {log.confidenceLevel}/5
+                                        <span className="flex items-center gap-2">
+                                            <Star className="h-4 w-4" />
+                                            <span className="font-medium">{log.confidenceLevel}/5</span>
                                         </span>
                                     </div>
                                 </motion.div>
