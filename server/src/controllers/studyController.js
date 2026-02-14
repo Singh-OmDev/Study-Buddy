@@ -31,31 +31,7 @@ const createStudyLog = async (req, res) => {
         const revisionDueDate = new Date(today);
         revisionDueDate.setDate(revisionDueDate.getDate() + revisionDays);
 
-        // AI Automatic Analysis (Enrichment)
-        let aiData = {};
-        if (notes && notes.length > 10) {
-            try {
-                console.log("Analyzing study notes with AI...");
-                const analysis = await generateAIContent('analysis', notes);
-
-                // Validate/Normalize AI response to match Schema
-                const validDifficulty = ['Easy', 'Medium', 'Hard'].includes(analysis.difficulty)
-                    ? analysis.difficulty
-                    : 'Medium';
-
-                aiData = {
-                    aiSummary: analysis.summary || "No summary generated",
-                    aiTags: Array.isArray(analysis.tags) ? analysis.tags : [],
-                    aiQuestions: Array.isArray(analysis.questions) ? analysis.questions : [],
-                    difficultyLevel: validDifficulty
-                };
-                console.log("AI Analysis Success:", aiData);
-            } catch (aiError) {
-                console.error("AI Enrichment Failed (Continuing without it):", aiError.message);
-                // Continue without AI data
-            }
-        }
-
+        // SAVE LOG IMMEDIATELY (Don't wait for AI)
         const studyLog = await StudyLog.create({
             user: req.user._id,
             subject,
@@ -63,9 +39,37 @@ const createStudyLog = async (req, res) => {
             durationMinutes,
             notes,
             confidenceLevel: confidence,
-            revisionDueDate,
-            ...aiData
+            revisionDueDate
         });
+
+        // AI Analysis in Background (Non-blocking)
+        if (notes && notes.length > 10) {
+            // Fire and forget - don't await
+            (async () => {
+                try {
+                    console.log(`[Background] Analyzing study log ${studyLog._id}...`);
+                    const analysis = await generateAIContent('analysis', notes);
+
+                    // Validate/Normalize AI response
+                    const validDifficulty = ['Easy', 'Medium', 'Hard'].includes(analysis.difficulty)
+                        ? analysis.difficulty
+                        : 'Medium';
+
+                    const aiData = {
+                        aiSummary: analysis.summary || "No summary generated",
+                        aiTags: Array.isArray(analysis.tags) ? analysis.tags : [],
+                        aiQuestions: Array.isArray(analysis.questions) ? analysis.questions : [],
+                        difficultyLevel: validDifficulty
+                    };
+
+                    // Update the log with AI data
+                    await StudyLog.findByIdAndUpdate(studyLog._id, aiData);
+                    console.log(`[Background] AI enrichment complete for ${studyLog._id}`);
+                } catch (aiError) {
+                    console.error(`[Background] AI enrichment failed for ${studyLog._id}:`, aiError.message);
+                }
+            })();
+        }
 
         if (redis.status !== 'disabled') {
             await redis.del(`stats:${req.user._id}`);
