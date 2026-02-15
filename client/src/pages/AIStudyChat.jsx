@@ -142,6 +142,69 @@ const AIStudyChat = () => {
         }
     };
 
+
+    // --- Voice Assistant Logic ---
+    const [isListening, setIsListening] = useState(false);
+    const [isSpeaking, setIsSpeaking] = useState(false);
+    const [autoSpeak, setAutoSpeak] = useState(false);
+    const [language, setLanguage] = useState('en-US'); // 'en-US' or 'hi-IN'
+
+    // Speech Recognition Setup
+    const startListening = () => {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            alert("Voice input is not supported in this browser. Try Chrome/Edge.");
+            return;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.lang = language; // Use selected language
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => setIsListening(true);
+        recognition.onend = () => setIsListening(false);
+        recognition.onerror = (event) => {
+            console.error("Speech error", event.error);
+            setIsListening(false);
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            setInput(prev => prev + (prev ? ' ' : '') + transcript);
+        };
+
+        recognition.start();
+    };
+
+    // Text to Speech
+    const speakText = (text) => {
+        if (!('speechSynthesis' in window)) return;
+
+        window.speechSynthesis.cancel();
+        const cleanText = text.replace(/[*#_`]/g, '');
+
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.lang = language; // Set TTS language
+
+        // Try to find a matching voice
+        const voices = window.speechSynthesis.getVoices();
+        const matchingVoice = voices.find(v => v.lang.startsWith(language.split('-')[0]));
+        if (matchingVoice) utterance.voice = matchingVoice;
+
+        utterance.onstart = () => setIsSpeaking(true);
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = () => setIsSpeaking(false);
+
+        window.speechSynthesis.speak(utterance);
+    };
+
+    const stopSpeaking = () => {
+        window.speechSynthesis.cancel();
+        setIsSpeaking(false);
+    };
+
+    // Updated handleSend to include TTS
     const handleSend = async () => {
         if (!input.trim()) return;
 
@@ -152,12 +215,18 @@ const AIStudyChat = () => {
         setMessages(prev => [...prev, userMessage]);
         setInput('');
         setLoading(true);
+        setIsSpeaking(false); // Stop speaking if user interrupts
+
+        // Append language instruction if Hindi
+        const finalPrompt = language === 'hi-IN'
+            ? `${input} (Please answer in Hindi / Hinglish)`
+            : input;
 
         try {
             const token = await getToken();
             const { data } = await axios.post('/api/ai/generate', {
                 type: 'chat',
-                prompt: input,
+                prompt: finalPrompt,
                 context: fileContext,
                 sessionId: currentSessionId // Pass ID
             }, {
@@ -166,7 +235,13 @@ const AIStudyChat = () => {
                 }
             });
 
-            setMessages(prev => [...prev, { role: 'assistant', content: data.result }]);
+            const aiReply = data.result;
+            setMessages(prev => [...prev, { role: 'assistant', content: aiReply }]);
+
+            // Auto Speak if enabled
+            if (autoSpeak) {
+                speakText(aiReply);
+            }
 
             // Refresh session list to update title/timestamp
             fetchSessions();
@@ -186,6 +261,7 @@ const AIStudyChat = () => {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="max-w-6xl mx-auto h-[calc(100vh-140px)] flex gap-4 overflow-hidden">
@@ -239,9 +315,42 @@ const AIStudyChat = () => {
                             </p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                        <span className="text-xs text-zinc-500 font-mono">ONLINE</span>
+                    <div className="flex items-center gap-4">
+                        {/* Language Toggle */}
+                        <button
+                            onClick={() => setLanguage(prev => prev === 'en-US' ? 'hi-IN' : 'en-US')}
+                            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors border border-[#262626] ${language === 'hi-IN'
+                                ? 'bg-orange-500/20 text-orange-500 border-orange-500/50'
+                                : 'bg-[#1a1a1a] text-zinc-400 hover:text-white'
+                                }`}
+                        >
+                            {language === 'en-US' ? '🇺🇸 English' : '🇮🇳 Hindi'}
+                        </button>
+
+
+
+                        {/* Voice Output Toggle */}
+                        <button
+                            onClick={() => {
+                                if (isSpeaking) stopSpeaking();
+                                setAutoSpeak(!autoSpeak);
+                            }}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${autoSpeak
+                                ? 'bg-white text-black hover:bg-zinc-200'
+                                : 'bg-[#1a1a1a] text-zinc-400 hover:text-white border border-[#262626]'
+                                }`}
+                        >
+                            {isSpeaking ? (
+                                <span className="animate-pulse">🔊 Speaking...</span>
+                            ) : (
+                                autoSpeak ? '🔊 Auto-Read ON' : '🔇 Auto-Read OFF'
+                            )}
+                        </button>
+
+                        <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                            <span className="text-xs text-zinc-500 font-mono">ONLINE</span>
+                        </div>
                     </div>
                 </div>
 
@@ -279,24 +388,34 @@ const AIStudyChat = () => {
                                     {msg.role === 'user' ? (
                                         msg.content
                                     ) : (
-                                        <ReactMarkdown
-                                            children={msg.content}
-                                            remarkPlugins={[remarkGfm]}
-                                            components={{
-                                                strong: ({ node, ...props }) => <span className="font-bold text-white" {...props} />,
-                                                ul: ({ node, ...props }) => <ul className="list-disc ml-4 space-y-1 my-2" {...props} />,
-                                                ol: ({ node, ...props }) => <ol className="list-decimal ml-4 space-y-1 my-2" {...props} />,
-                                                p: ({ node, ...props }) => <p className="mb-2 last:mb-0 font-sans whitespace-pre-wrap" {...props} />,
-                                                li: ({ node, ...props }) => <li className="pl-1 font-sans" {...props} />,
-                                                code: ({ node, inline, className, children, ...props }) => {
-                                                    return inline ? (
-                                                        <code className="bg-[#1a1a1a] px-1 py-0.5 rounded text-xs font-mono border border-[#333]" {...props}>{children}</code>
-                                                    ) : (
-                                                        <code className="block bg-[#1a1a1a] p-3 rounded-lg text-xs font-mono border border-[#333] my-2 overflow-x-auto" {...props}>{children}</code>
-                                                    );
-                                                }
-                                            }}
-                                        />
+                                        <div className="group relative">
+                                            <ReactMarkdown
+                                                children={msg.content}
+                                                remarkPlugins={[remarkGfm]}
+                                                components={{
+                                                    strong: ({ node, ...props }) => <span className="font-bold text-white" {...props} />,
+                                                    ul: ({ node, ...props }) => <ul className="list-disc ml-4 space-y-1 my-2" {...props} />,
+                                                    ol: ({ node, ...props }) => <ol className="list-decimal ml-4 space-y-1 my-2" {...props} />,
+                                                    p: ({ node, ...props }) => <p className="mb-2 last:mb-0 font-sans whitespace-pre-wrap" {...props} />,
+                                                    li: ({ node, ...props }) => <li className="pl-1 font-sans" {...props} />,
+                                                    code: ({ node, inline, className, children, ...props }) => {
+                                                        return inline ? (
+                                                            <code className="bg-[#1a1a1a] px-1 py-0.5 rounded text-xs font-mono border border-[#333]" {...props}>{children}</code>
+                                                        ) : (
+                                                            <code className="block bg-[#1a1a1a] p-3 rounded-lg text-xs font-mono border border-[#333] my-2 overflow-x-auto" {...props}>{children}</code>
+                                                        );
+                                                    }
+                                                }}
+                                            />
+                                            {/* Read Aloud Button for Specific Message */}
+                                            <button
+                                                onClick={() => speakText(msg.content)}
+                                                className="absolute -bottom-6 right-0 text-zinc-600 hover:text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                                title="Read Aloud"
+                                            >
+                                                🔊 Read
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -364,12 +483,31 @@ const AIStudyChat = () => {
                                 <Paperclip className="h-4 w-4" />
                             )}
                         </button>
+
+                        {/* Voice Input Button */}
+                        <button
+                            onClick={isListening ? () => setIsListening(false) : startListening}
+                            className={`p-2 rounded-md transition-colors ${isListening
+                                ? 'bg-red-500/20 text-red-500 animate-pulse'
+                                : 'text-zinc-400 hover:text-white hover:bg-[#1a1a1a]'
+                                }`}
+                            title="Voice Input (Mic)"
+                        >
+                            {isListening ? (
+                                <div className="w-4 h-4 bg-red-500 rounded-full animate-ping"></div>
+                            ) : (
+                                // Use a simple SVG for Mic if Lucide Mic is not imported, or update imports. 
+                                // For safety, I'll use a direct SVG or assume Lucide Mic is available if I update imports.
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mic"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" x2="12" y1="19" y2="22" /></svg>
+                            )}
+                        </button>
+
                         <input
                             type="text"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                            placeholder="Type your query..."
+                            placeholder={isListening ? "Listening..." : "Type your query..."}
                             className="flex-1 bg-transparent p-2 text-white placeholder-zinc-600 focus:outline-none font-sans text-sm"
                         />
                         <button
@@ -380,8 +518,11 @@ const AIStudyChat = () => {
                             <Send className="h-4 w-4" />
                         </button>
                     </div>
-                    <div className="text-center mt-2">
+                    <div className="text-center mt-2 flex justify-center gap-4">
                         <p className="text-[10px] text-zinc-700 font-mono">AI can make mistakes. Verify important info.</p>
+                        {isSpeaking && (
+                            <button onClick={stopSpeaking} className="text-[10px] text-red-500 hover:underline">Stop Speaking</button>
+                        )}
                     </div>
                 </div>
             </div>

@@ -244,6 +244,13 @@ const Dashboard = () => {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-4">
+                                        {/* Added Next Revision Date */}
+                                        {log.revisionDueDate && (
+                                            <div className="flex items-center gap-1 text-xs text-orange-400/80 bg-orange-900/10 px-2 py-1 rounded">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
+                                                Next: {new Date(log.revisionDueDate).toLocaleDateString()}
+                                            </div>
+                                        )}
                                         <span className="text-white font-mono text-sm">{log.durationMinutes}m</span>
                                         <button
                                             onClick={() => handleDelete(log._id)}
