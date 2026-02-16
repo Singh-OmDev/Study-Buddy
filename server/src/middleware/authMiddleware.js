@@ -1,18 +1,17 @@
 import { ClerkExpressRequireAuth, clerkClient } from '@clerk/clerk-sdk-node';
 import User from '../models/User.js';
+import redis from '../config/redis.js';
 
 
+// @desc    Protect routes using Clerk Auth & Redis Cache
 const protect = async (req, res, next) => {
-    // Let's use the provided Middleware from the SDK
-    console.log("Auth Middleware hit. Path:", req.path);
-    console.log("Auth Header:", req.headers.authorization ? "Present (" + req.headers.authorization.length + " chars)" : "MISSING");
+    // console.log("Auth Middleware hit. Path:", req.path);
 
     ClerkExpressRequireAuth()(req, res, async (err) => {
         if (err) {
             console.error("Clerk Auth Error:", err);
             return res.status(401).json({ message: 'Not authorized, token failed', error: err.message });
         }
-        console.log("Clerk Auth Success. UserID:", req.auth.userId);
 
         try {
             const { userId } = req.auth;
@@ -21,6 +20,17 @@ const protect = async (req, res, next) => {
                 return res.status(401).json({ message: 'No User ID found' });
             }
 
+            // 1. Try Cache First
+            if (redis.status !== 'disabled') {
+                const cachedUser = await redis.get(`user:${userId}`);
+                if (cachedUser) {
+                    // console.log("Auth: Serving from Redis Cache"); 
+                    req.user = typeof cachedUser === 'string' ? JSON.parse(cachedUser) : cachedUser;
+                    return next();
+                }
+            }
+
+            // 2. Fallback to DB
             let user = await User.findOne({ clerkId: userId });
 
             if (!user) {
@@ -36,6 +46,15 @@ const protect = async (req, res, next) => {
                     credits: 5,
                     plan: 'free'
                 });
+            }
+
+            // 3. Save to Cache (1 hour)
+            if (redis.status !== 'disabled') {
+                if (typeof redis.setex === 'function') {
+                    await redis.setex(`user:${userId}`, 3600, JSON.stringify(user));
+                } else {
+                    await redis.set(`user:${userId}`, user, { ex: 3600 });
+                }
             }
 
             req.user = user;

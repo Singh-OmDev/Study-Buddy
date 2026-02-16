@@ -24,5 +24,8 @@ const studyLogSchema = mongoose.Schema({
     date: { type: Date, default: Date.now }
 }, { timestamps: true });
 
+// Optimize Dashboard Queries: Sort by Date for a specific User
+studyLogSchema.index({ user: 1, date: -1 });
+
 const StudyLog = mongoose.model('StudyLog', studyLogSchema);
 export default StudyLog;
