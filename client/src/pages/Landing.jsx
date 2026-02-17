@@ -14,10 +14,7 @@ const Landing = () => {
             {/* Hero Section */}
             <div className="relative overflow-hidden pt-20 pb-16 md:pt-32 md:pb-24">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1a1a1a] border border-[#262626] text-xs font-mono text-zinc-400 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        AI-POWERED LEARNING SYSTEM v1.0
-                    </div>
+
 
                     <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
                         Master your <br />
