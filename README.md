@@ -7,7 +7,7 @@ A full-stack, AI-powered study assistant designed to optimize learning retention
 ![Tech Stack](https://img.shields.io/badge/Stack-MERN-blue)
 ![License](https://img.shields.io/badge/License-MIT-purple)
 
-<img width="100%" alt="AI Study Buddy Dashboard" src="https://github.com/user-attachments/assets/525adbc5-ade7-48b3-a431-7e25e7cc60af" />
+<img width="1536" height="1024" alt="ChatGPT Image Feb 28, 2026, 09_32_43 PM" src="https://github.com/user-attachments/assets/d0909d43-1c39-44af-9a3d-8e21d8e68a0c" />
 
 ## 🚀 Key Features
 
