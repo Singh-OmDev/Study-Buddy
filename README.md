@@ -1,7 +1,4 @@
-# AI Study Buddy 🧠📚
-[Live Demo](https://ai-study-buddy-inky.vercel.app/)
 
-<img width="1536" height="1024" alt="Dashboard Preview" src="https://github.com/user-attachments/assets/d0909d43-1c39-44af-9a3d-8e21d8e68a0c" />
 
 # AI Study Buddy 🧠📚
 
