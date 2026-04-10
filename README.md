@@ -1,7 +1,3 @@
-
-
-<img width="1536" height="1024" alt="ChatGPT Image Feb 28, 2026, 09_32_43 PM" src="https://github.com/user-attachments/assets/d0909d43-1c39-44af-9a3d-8e21d8e68a0c" />
-
 # AI Study Buddy 🧠📚
 [Live Demo](https://ai-study-buddy-inky.vercel.app/)
 
@@ -82,15 +78,17 @@ Follow these steps to set up the project locally.
 ```bash
 git clone https://github.com/Singh-OmDev/AI-Study-Buddy.git
 cd ai-study-buddy
-2. Backend Setup
-Navigate to the server directory and install dependencies:
+```
 
-bash
+### 2. Backend Setup
+Navigate to the server directory and install dependencies:
+```bash
 cd server
 npm install
-Create a .env file in the server/ directory with the following variables:
+```
 
-env
+Create a `.env` file in the `server/` directory with the following variables:
+```env
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/ai_study_buddy
 GROQ_API_KEY=your_groq_api_key
@@ -100,46 +98,66 @@ CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
 # UPSTASH_REDIS_REST_URL=...
 # UPSTASH_REDIS_REST_TOKEN=...
 # REDIS_URI=redis://localhost:6379
+```
+
 Start the backend server:
-
-bash
+```bash
 npm run dev
-3. Frontend Setup
-Open a new terminal, navigate to the client directory, and install dependencies:
+```
 
-bash
+### 3. Frontend Setup
+Open a new terminal, navigate to the client directory, and install dependencies:
+```bash
 cd client
 npm install
-Create a .env file in the client/ directory with your Clerk key:
+```
 
-env
+Create a `.env` file in the `client/` directory with your Clerk key:
+```env
 VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+```
+
 Start the frontend development server:
-
-bash
+```bash
 npm run dev
-Visit http://localhost:5173 to view the application in action.
+```
 
-🧪 Testing
-We use Vitest for the frontend and Jest for the backend.
+Visit `http://localhost:5173` to view the application in action.
 
-Frontend Tests
-bash
+---
+
+## 🧪 Testing
+
+We use **Vitest** for the frontend and **Jest** for the backend.
+
+### Frontend Tests
+```bash
 cd client
 npm test
-Backend Tests
-bash
+```
+
+### Backend Tests
+```bash
 cd server
 npm test
-🤝 Contributing
-Contributions make the open-source community an amazing place to learn, inspire, and create. Any contributions you make are greatly appreciated.
+```
 
-Fork the Project
-Create your Feature Branch (git checkout -b feature/AmazingFeature)
-Commit your Changes (git commit -m 'Add some AmazingFeature')
-Push to the Branch (git push origin feature/AmazingFeature)
-Open a Pull Request
-📄 License
+---
+
+## 🤝 Contributing
+
+Contributions make the open-source community an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
 This project is licensed under the MIT License.
 
-Built with ❤️ for lifelong learners.
+---
+
+*Built with ❤️ for lifelong learners.*

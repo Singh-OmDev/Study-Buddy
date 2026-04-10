@@ -62,7 +62,8 @@ const StudyRoom = () => {
     useEffect(() => {
         if (!roomId || !user) return;
 
-        const newSocket = io(window.location.origin.replace('5173', '5000'));
+        const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+        const newSocket = io(API_URL);
         setSocket(newSocket);
 
         const newPeer = new Peer({

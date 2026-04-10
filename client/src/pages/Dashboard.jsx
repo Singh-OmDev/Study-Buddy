@@ -69,7 +69,8 @@ const Dashboard = () => {
     useEffect(() => {
         if (!user) return;
         
-        const newSocket = io('http://localhost:5000');
+        const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+        const newSocket = io(API_URL);
         setSocket(newSocket);
         
         newSocket.emit('register-user', user._id || user.id);
