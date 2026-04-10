@@ -2,9 +2,7 @@ import StudyLog from '../models/StudyLog.js';
 import { generateAIContent } from '../services/aiService.js';
 import redis from '../config/redis.js';
 
-// @desc    Create new study log
-// @route   POST /api/study
-// @access  Private
+// create a log
 const createStudyLog = async (req, res) => {
     try {
         const {
@@ -16,11 +14,12 @@ const createStudyLog = async (req, res) => {
         } = req.body;
 
         if (!subject || !topic || !durationMinutes) {
+            console.log("missing stuff in req.body:", req.body); // was getting undefined earlier
             res.status(400).json({ message: 'Please add all required fields' });
             return;
         }
 
-        // Smart Revision Logic (Rule-based)
+        // figure out when to revise next depending on how confident they were
         const today = new Date();
         let revisionDays = 3;
         const confidence = parseInt(confidenceLevel) || 3;
@@ -31,7 +30,7 @@ const createStudyLog = async (req, res) => {
         const revisionDueDate = new Date(today);
         revisionDueDate.setDate(revisionDueDate.getDate() + revisionDays);
 
-        // SAVE LOG IMMEDIATELY (Don't wait for AI)
+        // don't wait for AI to finish, just save it now
         const studyLog = await StudyLog.create({
             user: req.user._id,
             subject,
@@ -42,12 +41,12 @@ const createStudyLog = async (req, res) => {
             revisionDueDate
         });
 
-        // AI Analysis in Background (Non-blocking)
+        // run AI stuff in background so user doesn't wait
         if (notes && notes.length > 10) {
-            // Fire and forget - don't await
+            // fire and forget
             (async () => {
                 try {
-                    console.log(`[Background] Analyzing study log ${studyLog._id}...`);
+                    // console.log("starting background jobs for log ", studyLog._id);
                     const analysis = await generateAIContent('analysis', notes);
 
                     // Validate/Normalize AI response
@@ -81,9 +80,6 @@ const createStudyLog = async (req, res) => {
     }
 };
 
-// @desc    Get user study logs
-// @route   GET /api/study
-// @access  Private
 const getStudyLogs = async (req, res) => {
     try {
         const logs = await StudyLog.find({ user: req.user._id }).sort({ date: -1 });
@@ -93,40 +89,29 @@ const getStudyLogs = async (req, res) => {
     }
 };
 
-// @desc Get Stats
-// @route GET /api/study/stats
-// @access Private
+// calc stats for dashboard
 const getStats = async (req, res) => {
     try {
-        const cacheKey = `stats:${req.user._id}`;
+        const timeframe = req.query.timeframe || 'this_week';
+        const cacheKey = `stats:${req.user._id}:${timeframe}`;
 
         // Try to fetch from cache
         if (redis.status !== 'disabled') {
             const cachedData = await redis.get(cacheKey);
             if (cachedData) {
-                console.log("Serving stats from Redis Cache");
-                // Upstash Redis returns object directly, ioredis returns string
+                console.log("Serving stats from Redis Cache for timeframe:", timeframe);
                 return res.json(typeof cachedData === 'string' ? JSON.parse(cachedData) : cachedData);
             }
         }
 
-        const logs = await StudyLog.find({ user: req.user._id });
+        const allLogs = await StudyLog.find({ user: req.user._id });
 
-        const totalMinutes = logs.reduce((acc, log) => acc + log.durationMinutes, 0);
-        const totalHours = (totalMinutes / 60).toFixed(1);
-
-        const subjectStats = logs.reduce((acc, log) => {
-            acc[log.subject] = (acc[log.subject] || 0) + log.durationMinutes;
-            return acc;
-        }, {});
-
-        // Calculate Streak
+        // Streak Calculation using ALl logs spanning forever
         const now = new Date();
         const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
         const startOfYesterday = startOfToday - 86400000;
 
-        // Get unique study dates (normalized to midnight)
-        const studyDates = [...new Set(logs.map(log => {
+        const studyDates = [...new Set(allLogs.map(log => {
             const d = new Date(log.date);
             return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
         }))].sort((a, b) => b - a);
@@ -134,12 +119,9 @@ const getStats = async (req, res) => {
         let streak = 0;
         if (studyDates.length > 0) {
             const lastStudyDate = studyDates[0];
-
-            // Streak is valid if last study was today or yesterday
             if (lastStudyDate === startOfToday || lastStudyDate === startOfYesterday) {
                 streak = 1;
                 let expectedPrevDate = lastStudyDate - 86400000;
-
                 for (let i = 1; i < studyDates.length; i++) {
                     if (studyDates[i] === expectedPrevDate) {
                         streak++;
@@ -151,14 +133,78 @@ const getStats = async (req, res) => {
             }
         }
 
+        // Timeframe boundary logic
+        let startDate = null;
+        let endDate = null;
+        const current = new Date();
+        // Zero out current time to start of day for easier math
+        const todayAtMidnight = new Date(current.getFullYear(), current.getMonth(), current.getDate());
+
+        if (timeframe === 'this_week') {
+            const dayOfWeek = todayAtMidnight.getDay(); // 0 is Sunday
+            // Start of this week (Sunday)
+            startDate = new Date(todayAtMidnight);
+            startDate.setDate(todayAtMidnight.getDate() - dayOfWeek);
+        } else if (timeframe === 'prev_week') {
+            const dayOfWeek = todayAtMidnight.getDay();
+            // End of prev week (Saturday)
+            endDate = new Date(todayAtMidnight);
+            endDate.setDate(todayAtMidnight.getDate() - dayOfWeek - 1);
+            // End of day
+            endDate.setHours(23, 59, 59, 999);
+            // Start of prev week (Sunday)
+            startDate = new Date(todayAtMidnight);
+            startDate.setDate(todayAtMidnight.getDate() - dayOfWeek - 7);
+        } else if (timeframe === 'this_month') {
+            startDate = new Date(todayAtMidnight.getFullYear(), todayAtMidnight.getMonth(), 1);
+        } else if (timeframe === 'prev_month') {
+            startDate = new Date(todayAtMidnight.getFullYear(), todayAtMidnight.getMonth() - 1, 1);
+            endDate = new Date(todayAtMidnight.getFullYear(), todayAtMidnight.getMonth(), 0);
+            endDate.setHours(23, 59, 59, 999);
+        }
+
+        // Filter logs strictly for charts/totals
+        const logs = allLogs.filter(log => {
+            if (timeframe === 'all_time') return true;
+            const logDate = new Date(log.date).getTime();
+            const afterStart = startDate ? logDate >= startDate.getTime() : true;
+            const beforeEnd = endDate ? logDate <= endDate.getTime() : true;
+            return afterStart && beforeEnd;
+        });
+
+        const totalMinutes = logs.reduce((acc, log) => acc + log.durationMinutes, 0);
+        const totalHours = (totalMinutes / 60).toFixed(1);
+
+        const subjectStats = logs.reduce((acc, log) => {
+            acc[log.subject] = (acc[log.subject] || 0) + log.durationMinutes;
+            return acc;
+        }, {});
+
+        // Recent logs strictly bounded by the timeframe
         const recentLogs = logs.slice(-5).reverse();
+
+        // Calculate "Due for Revision" using ALL logs
+        const latestLogsByTopic = {};
+        allLogs.forEach(log => {
+            const key = `${log.subject.toLowerCase()}-${log.topic.toLowerCase()}`;
+            if (!latestLogsByTopic[key] || new Date(log.date) > new Date(latestLogsByTopic[key].date)) {
+                latestLogsByTopic[key] = log;
+            }
+        });
+
+        const nowTime = new Date().getTime();
+        const dueForRevision = Object.values(latestLogsByTopic)
+            .filter(log => log.revisionDueDate && new Date(log.revisionDueDate).getTime() <= nowTime)
+            .sort((a, b) => new Date(a.revisionDueDate) - new Date(b.revisionDueDate))
+            .slice(0, 5); // Limit to top 5 most overdue
 
         const responseData = {
             totalLogs: logs.length,
             totalHours,
             subjectStats,
-            streak,
-            recentLogs
+            streak,     // Streak is from ALL-TIME logs, so it never resets artificially
+            recentLogs,
+            dueForRevision // Append the tracked revisions
         };
 
         // Save to cache
@@ -177,9 +223,6 @@ const getStats = async (req, res) => {
     }
 }
 
-// @desc    Delete study log
-// @route   DELETE /api/study/:id
-// @access  Private
 const deleteStudyLog = async (req, res) => {
     try {
         const log = await StudyLog.findById(req.params.id);
@@ -205,4 +248,42 @@ const deleteStudyLog = async (req, res) => {
     }
 };
 
-export { createStudyLog, getStudyLogs, getStats, deleteStudyLog };
+
+// Knowledge Gap Analyzer - scores every topic by how likely it is forgotten
+const getKnowledgeGaps = async (req, res) => {
+    try {
+        const logs = await StudyLog.find({ user: req.user._id }).sort({ createdAt: -1 }).lean();
+        
+        if (logs.length === 0) {
+            return res.json([]);
+        }
+
+        const now = new Date();
+
+        // Score each log: older + lower confidence = higher danger
+        const scored = logs.map(log => {
+            const ageInDays = Math.max(1, Math.floor((now - new Date(log.createdAt)) / (1000 * 60 * 60 * 24)));
+            const confidence = log.confidenceLevel || 3;
+            // weakness: old logs with low confidence score highest
+            const weaknessScore = ageInDays * (6 - confidence);
+            return {
+                _id: log._id,
+                topic: log.topic,
+                subject: log.subject,
+                notes: log.notes || '',
+                confidenceLevel: confidence,
+                ageInDays,
+                weaknessScore: Math.round(weaknessScore),
+                createdAt: log.createdAt
+            };
+        });
+
+        // Sort by weakness and return top 5
+        scored.sort((a, b) => b.weaknessScore - a.weaknessScore);
+        res.json(scored.slice(0, 5));
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export { createStudyLog, getStudyLogs, getStats, deleteStudyLog, getKnowledgeGaps };

@@ -10,6 +10,8 @@ import CalendarView from './pages/CalendarView';
 import AIStudyChat from './pages/AIStudyChat';
 import Landing from './pages/Landing';
 import ZenMode from './pages/ZenMode';
+import StudyRoom from './pages/StudyRoom';
+import VivaVoce from './pages/VivaVoce';
 
 import Features from './pages/Features';
 import FocusMode from './pages/FocusMode';
@@ -65,6 +67,8 @@ function AppRoutes() {
             <Route path="/focus" element={<FocusMode />} />
             <Route path="/ai-revision" element={<AIRevision />} />
             <Route path="/zen" element={<ZenMode />} />
+            <Route path="/study-room" element={<StudyRoom />} />
+            <Route path="/viva" element={<VivaVoce />} />
           </Route>
         </Routes>
       </div>

@@ -10,9 +10,7 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 } // 5MB Limit
 });
 
-// @desc    Upload file and extract text
-// @route   POST /api/upload
-// @access  Private
+// upload file handler
 const uploadFile = async (req, res) => {
     try {
         console.log("Received upload request");
@@ -41,7 +39,7 @@ const uploadFile = async (req, res) => {
             return res.status(400).json({ message: 'Only PDF and Text files are supported currently.' });
         }
 
-        // Clean up text (remove excessive whitespace)
+        // clean up text so it's not a mess
         extractedText = extractedText.replace(/\s+/g, ' ').trim();
 
         if (!extractedText) {

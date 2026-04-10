@@ -6,13 +6,16 @@ import {
     createSession,
     getAllSessions,
     getSessionById,
-    deleteSession
+    deleteSession,
+    getYoutubeTranscript
 } from '../controllers/aiController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.post('/generate', protect, generateContent);
+router.post('/youtube', protect, getYoutubeTranscript);
+router.get('/youtube', (req, res) => res.status(405).json({ message: 'Please use the Study Lab interface to generate transcripts.' }));
 router.get('/history', protect, getHistory);
 router.get('/history/chat', protect, getChatHistory); // Deprecated single session
 

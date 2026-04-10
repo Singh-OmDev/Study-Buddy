@@ -10,13 +10,15 @@ const groq = process.env.GROQ_API_KEY
     })
     : null;
 
-export const generateAIContent = async (type, context, prompt = "") => {
+export const generateAIContent = async (type, context, prompt = "", image = null) => {
     if (!groq) {
         throw new Error("AI Service not configured: Missing API Key");
     }
 
     let systemPrompt = "You are an AI Study Buddy.";
     let userPrompt = "";
+    
+    let requestedModel = "llama-3.1-8b-instant";
 
     if (type === 'summary') {
         systemPrompt = "You are an expert summarizer. Create concise, high-yield summaries (2-3 lines).";
@@ -65,26 +67,42 @@ export const generateAIContent = async (type, context, prompt = "") => {
         
         Be encouraging, concise, and helpful.`;
         userPrompt = prompt;
+    } else if (type === 'viva') {
+        systemPrompt = `You are a strict but encouraging college professor conducting a Viva Voce oral exam.
+        The student will give you a spoken answer to a question on a topic.
+        Your task is to evaluate their answer and return ONLY a JSON object (no markdown) with:
+        - score: a number from 1 to 10
+        - grade: "Excellent" (9-10), "Good" (7-8), "Average" (5-6), or "Needs Work" (1-4)
+        - feedback: a 2-3 sentence encouraging but honest critique of what they said well and what key concepts they missed
+        - missed_keywords: an array of up to 4 important keywords or concepts they forgot to mention
+        
+        Return ONLY valid JSON. No markdown formatting.`;
+        userPrompt = `The student answered the Viva question on topic "${context}". Their spoken answer was:\n\n"${prompt}"\n\nEvaluate their answer.`;
     } else {
         systemPrompt = "You are a helpful assistant.";
         userPrompt = prompt || context;
     }
 
+    let messages = [
+        { role: "system", content: systemPrompt }
+    ];
+
+    let client = groq;
+
+    messages.push({ role: "user", content: userPrompt });
+
     try {
         const completion = await groq.chat.completions.create({
-            messages: [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: userPrompt }
-            ],
+            messages: messages,
             model: "llama-3.1-8b-instant",
             temperature: 0.5,
             max_tokens: 1024,
-            response_format: (type === 'analysis' || type === 'flashcards') ? { type: "json_object" } : { type: "text" }
+            ...((type === 'analysis' || type === 'flashcards' || type === 'viva') && { response_format: { type: "json_object" } })
         });
 
         const content = completion.choices[0]?.message?.content;
 
-        if (type === 'analysis' || type === 'flashcards') {
+        if (type === 'analysis' || type === 'flashcards' || type === 'viva') {
             return JSON.parse(content);
         }
 

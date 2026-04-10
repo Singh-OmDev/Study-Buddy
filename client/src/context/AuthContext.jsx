@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect } from 'react';
+import { createContext, useContext, useEffect, useMemo } from 'react';
 import { useUser, useAuth as useClerkAuth } from '@clerk/clerk-react';
 import axios from 'axios';
 
@@ -9,12 +9,14 @@ export const AuthProvider = ({ children }) => {
     const { getToken, signOut } = useClerkAuth();
 
     // Map Clerk user to our app's user structure
-    const user = clerkUser ? {
-        _id: clerkUser.id,
-        name: clerkUser.fullName,
-        email: clerkUser.primaryEmailAddress?.emailAddress,
-        imageUrl: clerkUser.imageUrl
-    } : null;
+    const user = useMemo(() => {
+        return clerkUser ? {
+            _id: clerkUser.id,
+            name: clerkUser.fullName,
+            email: clerkUser.primaryEmailAddress?.emailAddress,
+            imageUrl: clerkUser.imageUrl
+        } : null;
+    }, [clerkUser?.id, clerkUser?.fullName, clerkUser?.imageUrl]);
 
     useEffect(() => {
         const setupAuth = async () => {

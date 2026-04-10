@@ -8,12 +8,12 @@ import { useAuth } from '../context/AuthContext';
 const AIStudyChat = () => {
     const { user, getToken } = useAuth();
 
-    // Session State
+    // chat sessions
     const [sessions, setSessions] = useState([]);
     const [currentSessionId, setCurrentSessionId] = useState(null);
     const [messages, setMessages] = useState([]); // Current messages
 
-    // UI State
+    // ui stuff
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
@@ -143,13 +143,13 @@ const AIStudyChat = () => {
     };
 
 
-    // --- Voice Assistant Logic ---
+    // voice stuff
     const [isListening, setIsListening] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [autoSpeak, setAutoSpeak] = useState(false);
     const [language, setLanguage] = useState('en-US'); // 'en-US' or 'hi-IN'
 
-    // Speech Recognition Setup
+    // setup mic
     const startListening = () => {
         if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
             alert("Voice input is not supported in this browser. Try Chrome/Edge.");
@@ -208,7 +208,7 @@ const AIStudyChat = () => {
     const handleSend = async () => {
         if (!input.trim()) return;
 
-        // If no session exists for some reason, create one first? (Should exist though)
+        // create a new session just in case
         if (!currentSessionId) await createNewSession();
 
         const userMessage = { role: 'user', content: input };
@@ -440,17 +440,15 @@ const AIStudyChat = () => {
 
                 {/* Input Area */}
                 <div className="p-4 bg-[#111111] border-t border-[#262626]">
-                    {/* Quick Actions */}
+                    {/* Quick Actions — chat-unique only (Quiz Me / Flashcards / Find Gaps moved to Dashboard) */}
                     <div className="flex gap-2 overflow-x-auto no-scrollbar mb-3">
                         {[
-                            { label: "Quiz Me", prompt: "Test me on my last study session.", icon: Sparkles },
-                            { label: "Progress", prompt: "Summarize what I've learned this week.", icon: Terminal },
-                            { label: "Suggest Study", prompt: "What topic should I review based on my confidence?", icon: Bot },
-                            { label: "Flashcards", prompt: "Create 3 key flashcards from my recent notes.", icon: Layers },
-                            { label: "Find Gaps", prompt: "Analyze my history and find my weakest areas.", icon: Target },
-                            { label: "Explain", prompt: "Explain the last topic I studied like I'm 5 years old.", icon: Lightbulb },
-                            { label: "3-Day Plan", prompt: "Create a structured 3-day study plan covering my weak areas.", icon: CalendarIcon },
-                            { label: "Deep Dive", prompt: "Pick one concept I struggled with and explain it in depth.", icon: Search }
+                            { label: "This Week", prompt: "Summarize what I've learned this week and how I'm progressing.", icon: Terminal },
+                            { label: "What to Study", prompt: "Based on my confidence scores and last sessions, what topic should I study next and for how long?", icon: Bot },
+                            { label: "Explain Simply", prompt: "Explain the last topic I studied like I'm completely new to it — use simple analogies.", icon: Lightbulb },
+                            { label: "3-Day Plan", prompt: "Create a structured 3-day study plan covering my weak areas. Include timings and topics.", icon: CalendarIcon },
+                            { label: "Deep Dive", prompt: "Pick one concept I struggled with recently and explain it in full depth with examples.", icon: Search },
+                            { label: "Exam Tips", prompt: "Give me practical exam tips and strategies for the subject I've been studying most.", icon: Sparkles },
                         ].map((action, i) => (
                             <button
                                 key={i}
@@ -462,6 +460,7 @@ const AIStudyChat = () => {
                             </button>
                         ))}
                     </div>
+
 
                     <div className="flex items-center gap-2 bg-[#0a0a0a] border border-[#262626] p-2 rounded-lg focus-within:border-zinc-500 transition-colors">
                         <input

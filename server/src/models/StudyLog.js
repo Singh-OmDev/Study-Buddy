@@ -11,12 +11,12 @@ const studyLogSchema = mongoose.Schema({
     durationMinutes: { type: Number, required: true },
     notes: { type: String }, // Acts as "rawStudyText"
 
-    // Enhanced Metrics
+    // metrics
     confidenceLevel: { type: Number, min: 1, max: 5, default: 3 },
     difficultyLevel: { type: String, enum: ['Easy', 'Medium', 'Hard'], default: 'Medium' },
     revisionDueDate: { type: Date },
 
-    // AI Enrichment
+    // ai stuff based on the raw text
     aiSummary: { type: String },
     aiTags: [{ type: String }],
     aiQuestions: [{ type: String }], // Array of question strings
@@ -24,7 +24,7 @@ const studyLogSchema = mongoose.Schema({
     date: { type: Date, default: Date.now }
 }, { timestamps: true });
 
-// Optimize Dashboard Queries: Sort by Date for a specific User
+// indexing to speed up queries for the dashboard
 studyLogSchema.index({ user: 1, date: -1 });
 
 const StudyLog = mongoose.model('StudyLog', studyLogSchema);
