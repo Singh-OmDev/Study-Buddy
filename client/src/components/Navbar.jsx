@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BookOpen, BarChart2, Brain, LogOut, Calendar, Sparkles, MessageSquare, Zap, User, Menu, X, Mic } from 'lucide-react';
+import { BookOpen, BarChart2, Brain, LogOut, Calendar, Sparkles, MessageSquare, Zap, User, Menu, X, Mic, Headphones } from 'lucide-react';
 import { UserButton } from '@clerk/clerk-react';
 
 const Navbar = () => {
@@ -39,11 +39,10 @@ const Navbar = () => {
                                 <NavLink to="/features" text="Features" icon={Zap} />
                                 <NavLink to="/log" text="Logger" icon={BookOpen} />
                                 <NavLink to="/dashboard" text="Dashboard" icon={BarChart2} />
-                                <NavLink to="/focus" text="Focus" icon={Brain} />
+                                <NavLink to="/hub" text="Lofi Hub" icon={Headphones} />
                                 <NavLink to="/calendar" text="Calendar" icon={Calendar} />
                                 <NavLink to="/chat" text="Chat" icon={MessageSquare} />
                                 <NavLink to="/ai-revision" text="AI Tools" icon={Sparkles} />
-                                <NavLink to="/viva" text="Viva" icon={Mic} />
                             </div>
 
                             <div className="flex items-center gap-4">
@@ -86,11 +85,10 @@ const Navbar = () => {
                         <MobileNavLink to="/features" text="Features" icon={Zap} />
                         <MobileNavLink to="/log" text="Logger" icon={BookOpen} />
                         <MobileNavLink to="/dashboard" text="Dashboard" icon={BarChart2} />
-                        <MobileNavLink to="/focus" text="Focus" icon={Brain} />
+                        <MobileNavLink to="/hub" text="Lofi Hub" icon={Headphones} />
                         <MobileNavLink to="/calendar" text="Calendar" icon={Calendar} />
                         <MobileNavLink to="/chat" text="Chat" icon={MessageSquare} />
                         <MobileNavLink to="/ai-revision" text="AI Tools" icon={Sparkles} />
-                        <MobileNavLink to="/viva" text="Viva Voce" icon={Mic} />
                     </div>
                 </div>
             )}

@@ -11,14 +11,13 @@ import AIStudyChat from './pages/AIStudyChat';
 import Landing from './pages/Landing';
 import ZenMode from './pages/ZenMode';
 import StudyRoom from './pages/StudyRoom';
-import VivaVoce from './pages/VivaVoce';
 
 import Features from './pages/Features';
-import FocusMode from './pages/FocusMode';
+import LofiHub from './pages/LofiHub';
 import Footer from './components/Footer';
 
 // Pages where the main layout wrapper and Footer should be modified/hidden
-const NO_FOOTER_ROUTES = ['/zen', '/focus'];
+const NO_FOOTER_ROUTES = ['/zen', '/hub'];
 const AUTH_ROUTES = ['/login', '/register', '/sign-in', '/sign-up'];
 
 // Protected Route Wrapper
@@ -64,11 +63,10 @@ function AppRoutes() {
             <Route path="/log" element={<StudyLogger />} />
             <Route path="/calendar" element={<CalendarView />} />
             <Route path="/chat" element={<AIStudyChat />} />
-            <Route path="/focus" element={<FocusMode />} />
+            <Route path="/hub" element={<LofiHub />} />
             <Route path="/ai-revision" element={<AIRevision />} />
             <Route path="/zen" element={<ZenMode />} />
             <Route path="/study-room" element={<StudyRoom />} />
-            <Route path="/viva" element={<VivaVoce />} />
           </Route>
         </Routes>
       </div>

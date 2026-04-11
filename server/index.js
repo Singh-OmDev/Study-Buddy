@@ -24,6 +24,26 @@ const io = new Server(server, {
 app.locals.io = io;
 app.locals.onlineUsers = new Map(); // Maps clerkId -> socket.id
 
+// Hub State
+app.locals.hubUsers = new Map(); // socket.id -> { name, imageUrl, goal }
+let globalHubMode = 'focus';
+let globalHubTimeLeft = 25 * 60;
+
+// Hub Global Timer Tick
+setInterval(() => {
+    globalHubTimeLeft--;
+    if (globalHubTimeLeft <= 0) {
+        if (globalHubMode === 'focus') {
+            globalHubMode = 'break';
+            globalHubTimeLeft = 5 * 60;
+        } else {
+            globalHubMode = 'focus';
+            globalHubTimeLeft = 25 * 60;
+        }
+    }
+    io.to('global-hub').emit('hub-timer-sync', { mode: globalHubMode, timeLeft: globalHubTimeLeft });
+}, 1000);
+
 io.on('connection', (socket) => {
   console.log(`User Connected: ${socket.id}`);
 
@@ -35,6 +55,25 @@ io.on('connection', (socket) => {
   socket.on('join-room', (roomId) => {
     socket.join(roomId);
     console.log(`User with ID: ${socket.id} joined room: ${roomId}`);
+  });
+
+  socket.on('join-hub', (userData) => {
+    socket.join('global-hub');
+    app.locals.hubUsers.set(socket.id, userData);
+    io.to('global-hub').emit('hub-users-update', Array.from(app.locals.hubUsers.values()));
+    socket.emit('hub-timer-sync', { mode: globalHubMode, timeLeft: globalHubTimeLeft });
+  });
+
+  socket.on('leave-hub', () => {
+    socket.leave('global-hub');
+    app.locals.hubUsers.delete(socket.id);
+    io.to('global-hub').emit('hub-users-update', Array.from(app.locals.hubUsers.values()));
+  });
+
+  socket.on('send-hub-emote', (data) => {
+    // data: { sourceName: "Om", targetId: "random-id", emote: "🔥" }
+    // Broadcast to everyone in the hub so they all see the emote float up!
+    io.to('global-hub').emit('receive-hub-emote', data);
   });
 
   socket.on('send-message', (data) => {
@@ -78,6 +117,12 @@ io.on('connection', (socket) => {
             console.log(`De-registered user: ${clerkId}`);
             break;
         }
+    }
+    
+    // Remove from Hub if present
+    if (app.locals.hubUsers.has(socket.id)) {
+        app.locals.hubUsers.delete(socket.id);
+        io.to('global-hub').emit('hub-users-update', Array.from(app.locals.hubUsers.values()));
     }
   });
 });
