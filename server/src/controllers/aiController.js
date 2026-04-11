@@ -383,10 +383,11 @@ const getYoutubeTranscript = async (req, res) => {
         }
 
         // --- THE EXTRAORDINARY UPGRADE: Long-form Intelligence ---
-        // Increase context limit significantly (Groq Llama 3.1 supports up to 128k)
-        // For very long videos, we take the most relevant parts: Start, Middle, and End
+        // Groq free tier limit is strictly 6000 Tokens Per Minute (TPM).
+        // A token is roughly 4 characters. So 6000 tokens ≈ 24000 characters.
+        // We set MAX_CHARS to 16000 to safely leave room for the prompt and output tokens.
         let processedTranscript = transcriptText;
-        const MAX_CHARS = 100000; 
+        const MAX_CHARS = 16000; 
 
         if (transcriptText.length > MAX_CHARS) {
             console.log(`Video too long (${transcriptText.length} chars). Using smart sampling...`);
