@@ -20,6 +20,7 @@ const studyLogSchema = mongoose.Schema({
     aiSummary: { type: String },
     aiTags: [{ type: String }],
     aiQuestions: [{ type: String }], // Array of question strings
+    embedding: [{ type: Number }], // 768-dim vector for Semantic Search
 
     date: { type: Date, default: Date.now }
 }, { timestamps: true });

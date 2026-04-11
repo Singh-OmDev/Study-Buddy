@@ -1,4 +1,4 @@
-import { generateAIContent } from '../services/aiService.js';
+import { generateAIContent, generateEmbedding, cosineSimilarity } from '../services/aiService.js';
 import StudyLog from '../models/StudyLog.js';
 import AIHistory from '../models/AIHistory.js';
 import ChatSession from '../models/ChatSession.js';
@@ -56,11 +56,35 @@ const generateContent = async (req, res) => {
         let aiContext = context || "";
 
         if (type === 'chat') {
-            // get past study data for context
-            const logs = await StudyLog.find({ user: req.user._id })
-                .sort({ date: -1 })
-                .limit(20)
-                .select('subject topic date aiSummary confidenceLevel');
+            // --- PERSISTENT MEMORY / VECTOR SEARCH ---
+            // 1. Generate an embedding for the user's prompt
+            const promptEmbedding = await generateEmbedding(prompt);
+            
+            let logs = [];
+            if (promptEmbedding) {
+                // Fetch ALL study logs for user that have an embedding mathematically computed
+                const allLogs = await StudyLog.find({ 
+                    user: req.user._id,
+                    embedding: { $exists: true, $not: { $size: 0 } }
+                }).select('subject topic date aiSummary confidenceLevel embedding');
+                
+                // Score them using mathematical Cosine Similarity in Javascript
+                const scoredLogs = allLogs.map(log => ({
+                    ...log.toObject(),
+                    score: cosineSimilarity(promptEmbedding, log.embedding)
+                }));
+                
+                // Sort descending (best match first) and take top 5
+                scoredLogs.sort((a, b) => b.score - a.score);
+                logs = scoredLogs.slice(0, 5);
+                console.log(`[Memory] Vector Search returned top ${logs.length} closest matches.`);
+            } else {
+                // Fallback to top 5 most recent if Gemini Embedding failed
+                logs = await StudyLog.find({ user: req.user._id })
+                    .sort({ date: -1 })
+                    .limit(5)
+                    .select('subject topic date aiSummary confidenceLevel');
+            }
 
             const history = logs.map(log =>
                 `- [${new Date(log.date).toLocaleDateString()}] ${log.subject}: ${log.topic} (Confidence: ${log.confidenceLevel}/5). Notes: ${log.aiSummary}`
@@ -69,9 +93,9 @@ const generateContent = async (req, res) => {
             const historyText = history.length > 0 ? history : "No study history found yet.";
 
             if (aiContext) {
-                aiContext = `[UPLOADED DOCUMENT CONTENT]:\n${aiContext}\n\n[STUDY LOG HISTORY]:\n${historyText}`;
+                aiContext = `[UPLOADED DOCUMENT CONTENT]:\n${aiContext}\n\n[RELEVANT RECALLED MEMORIES]:\n${historyText}`;
             } else {
-                aiContext = `[STUDY LOG HISTORY]:\n${historyText}`;
+                aiContext = `[RELEVANT RECALLED MEMORIES]:\n${historyText}`;
             }
         }
 

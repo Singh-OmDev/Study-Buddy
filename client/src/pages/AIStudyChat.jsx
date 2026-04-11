@@ -3,6 +3,11 @@ import axios from 'axios';
 import { Send, User, Bot, Sparkles, Terminal, Layers, Target, Lightbulb, Calendar as CalendarIcon, Search, Paperclip, FileText, Trash2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useAuth } from '../context/AuthContext';
 
 const AIStudyChat = () => {
@@ -391,18 +396,34 @@ const AIStudyChat = () => {
                                         <div className="group relative">
                                             <ReactMarkdown
                                                 children={msg.content}
-                                                remarkPlugins={[remarkGfm]}
+                                                remarkPlugins={[remarkGfm, remarkMath]}
+                                                rehypePlugins={[rehypeKatex]}
                                                 components={{
                                                     strong: ({ node, ...props }) => <span className="font-bold text-white" {...props} />,
                                                     ul: ({ node, ...props }) => <ul className="list-disc ml-4 space-y-1 my-2" {...props} />,
                                                     ol: ({ node, ...props }) => <ol className="list-decimal ml-4 space-y-1 my-2" {...props} />,
-                                                    p: ({ node, ...props }) => <p className="mb-2 last:mb-0 font-sans whitespace-pre-wrap" {...props} />,
+                                                    p: ({ node, ...props }) => <p className="mb-2 last:mb-0 font-sans whitespace-pre-wrap leading-relaxed" {...props} />,
                                                     li: ({ node, ...props }) => <li className="pl-1 font-sans" {...props} />,
-                                                    code: ({ node, inline, className, children, ...props }) => {
-                                                        return inline ? (
-                                                            <code className="bg-[#1a1a1a] px-1 py-0.5 rounded text-xs font-mono border border-[#333]" {...props}>{children}</code>
+                                                    code({ node, inline, className, children, ...props }) {
+                                                        const match = /language-(\w+)/.exec(className || '');
+                                                        return !inline ? (
+                                                            <div className="relative group my-4 rounded-xl overflow-hidden border border-[#333]">
+                                                                <div className="flex items-center justify-between px-4 py-1.5 bg-[#1a1a1a] border-b border-[#333] text-xs font-mono text-zinc-400">
+                                                                    <span>{match ? match[1] : 'code'}</span>
+                                                                </div>
+                                                                <SyntaxHighlighter
+                                                                    {...props}
+                                                                    children={String(children).replace(/\n$/, '')}
+                                                                    style={vscDarkPlus}
+                                                                    language={match ? match[1] : 'text'}
+                                                                    PreTag="div"
+                                                                    customStyle={{ margin: 0, padding: '1rem', background: '#0a0a0a', fontSize: '0.85rem' }}
+                                                                />
+                                                            </div>
                                                         ) : (
-                                                            <code className="block bg-[#1a1a1a] p-3 rounded-lg text-xs font-mono border border-[#333] my-2 overflow-x-auto" {...props}>{children}</code>
+                                                            <code className="bg-[#1a1a1a] px-1.5 py-0.5 rounded text-xs font-mono border border-[#333] text-orange-200" {...props}>
+                                                                {children}
+                                                            </code>
                                                         );
                                                     }
                                                 }}

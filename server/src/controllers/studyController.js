@@ -1,5 +1,5 @@
 import StudyLog from '../models/StudyLog.js';
-import { generateAIContent } from '../services/aiService.js';
+import { generateAIContent, generateEmbedding } from '../services/aiService.js';
 import redis from '../config/redis.js';
 
 // create a log
@@ -53,12 +53,17 @@ const createStudyLog = async (req, res) => {
                     const validDifficulty = ['Easy', 'Medium', 'Hard'].includes(analysis.difficulty)
                         ? analysis.difficulty
                         : 'Medium';
+                        
+                    // Generate Vector Embedding for Semantic Search / Persistent Memory
+                    const textToEmbed = `Topic: ${topic}\nSubject: ${subject}\nNotes: ${notes}\nAnalysis: ${analysis.summary}`;
+                    const embeddingVector = await generateEmbedding(textToEmbed);
 
                     const aiData = {
                         aiSummary: analysis.summary || "No summary generated",
                         aiTags: Array.isArray(analysis.tags) ? analysis.tags : [],
                         aiQuestions: Array.isArray(analysis.questions) ? analysis.questions : [],
-                        difficultyLevel: validDifficulty
+                        difficultyLevel: validDifficulty,
+                        embedding: embeddingVector || []
                     };
 
                     // Update the log with AI data
