@@ -1,5 +1,10 @@
 # 🧠 AI Study Buddy
 
+live demo -> https://ai-study-buddy-inky.vercel.app/
+
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/68960874-3ef7-48c9-9644-4fc7797618b1" />
+
+
 > A full-stack, AI-powered study platform built for students — featuring intelligent chat, YouTube-to-study-material conversion, peer-to-peer matching, a collaborative whiteboard, spaced repetition, and a global lo-fi study hub.
 
 ---
