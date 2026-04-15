@@ -210,6 +210,19 @@ const extractVideoId = (url) => {
     return null;
 };
 
+// Helper: In production, route page scraping through ScraperAPI to bypass cloud IP bans.
+// In local dev, hits YouTube directly (no SCRAPER_API_KEY needed).
+const proxyGet = async (url, options = {}) => {
+    const scraperKey = process.env.SCRAPER_API_KEY;
+    if (scraperKey) {
+        // Route through ScraperAPI residential proxy
+        const proxied = `http://api.scraperapi.com?api_key=${scraperKey}&url=${encodeURIComponent(url)}&render=false`;
+        return axios.get(proxied, { ...options, timeout: 30000 });
+    }
+    // Local dev — hit directly
+    return axios.get(url, options);
+};
+
 // Robust transcript fetcher — scrapes YouTube page HTML directly (no API key, supports all languages)
 const fetchYouTubeTranscriptFromPage = async (videoId) => {
     let sessionCookies = 'CONSENT=YES+cb.20210328-17-p0.en-GB+FX+403;';
@@ -248,25 +261,32 @@ const fetchYouTubeTranscriptFromPage = async (videoId) => {
         try {
             console.log(`[Fusion] Phase 1: Android Signing...`);
             const payload = { videoId, context: { client: { clientName: 'ANDROID', clientVersion: '20.10.38' } } };
-            const pRes = await axios.post('https://www.youtube.com/youtubei/v1/player', payload, { headers: { 'Content-Type': 'application/json' } });
+            // InnerTube is an official Google API — direct POST works even from cloud IPs usually
+            const pRes = await axios.post('https://www.youtube.com/youtubei/v1/player', payload, { 
+                headers: { 'Content-Type': 'application/json' },
+                timeout: 15000
+            });
             captionTracks = pRes.data.captions?.playerCaptionsTracklistRenderer?.captionTracks || [];
+            console.log(`[Fusion] Phase 1 found ${captionTracks.length} tracks.`);
         } catch (e) {
             console.warn(`[Fusion] Android approach failed: ${e.message}`);
         }
     }
 
-    // 3. NUCLEAR OPTION: Embed Page Extraction
+    // 3. NUCLEAR OPTION: Embed Page Extraction (routed via proxy in production)
+    let eHtml = '';
     if (captionTracks.length === 0) {
         try {
             console.log(`[Fusion] Phase 3: NUCLEAR EMBED EXTRACTION...`);
-            const eRes = await axios.get(`https://www.youtube.com/embed/${videoId}`, { headers: commonHeaders });
-            const eHtml = eRes.data;
+            const eRes = await proxyGet(`https://www.youtube.com/embed/${videoId}`, { headers: commonHeaders });
+            eHtml = eRes.data;
             const eMatch = eHtml.match(/"captionTracks":(\[.*?\])/s) || eHtml.match(/ytInitialPlayerResponse\s*=\s*({.*?});/s);
             if (eMatch) {
                 const parsed = JSON.parse(eMatch[1]);
                 captionTracks = parsed.captionTracks || parsed.captions?.playerCaptionsTracklistRenderer?.captionTracks || [];
+                console.log(`[Fusion] Phase 3 found ${captionTracks.length} tracks.`);
             }
-        } catch (e) {}
+        } catch (e) { console.warn(`[Fusion] Phase 3 failed: ${e.message}`); }
     }
 
     // 4. ADVANCED FALLBACK: Aggressive Extraction from Initial Data
