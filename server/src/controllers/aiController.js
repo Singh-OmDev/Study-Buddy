@@ -210,36 +210,43 @@ const extractVideoId = (url) => {
     return null;
 };
 
-// Helper: In production, route page scraping through ScraperAPI to bypass cloud IP bans.
+// Helper: In production, route ALL YouTube requests through ScraperAPI residential IPs.
 // In local dev, hits YouTube directly (no SCRAPER_API_KEY needed).
 const proxyGet = async (url, options = {}) => {
     const scraperKey = process.env.SCRAPER_API_KEY;
     if (scraperKey) {
-        // Route through ScraperAPI residential proxy
         const proxied = `http://api.scraperapi.com?api_key=${scraperKey}&url=${encodeURIComponent(url)}&render=false`;
         return axios.get(proxied, { ...options, timeout: 30000 });
     }
-    // Local dev — hit directly
     return axios.get(url, options);
+};
+
+// ScraperAPI also supports proxying POST requests
+const proxyPost = async (url, body, options = {}) => {
+    const scraperKey = process.env.SCRAPER_API_KEY;
+    if (scraperKey) {
+        const proxied = `http://api.scraperapi.com?api_key=${scraperKey}&url=${encodeURIComponent(url)}&render=false`;
+        return axios.post(proxied, body, { ...options, timeout: 30000 });
+    }
+    return axios.post(url, body, options);
 };
 
 // Robust transcript fetcher — scrapes YouTube page HTML directly (no API key, supports all languages)
 const fetchYouTubeTranscriptFromPage = async (videoId) => {
     let sessionCookies = 'CONSENT=YES+cb.20210328-17-p0.en-GB+FX+403;';
     
-    // STEP 0: Live Session Handshake (Get fresh cookies from YouTube)
+    // STEP 0: Live Session Handshake — proxied in production
     try {
         console.log(`[Fusion] Initiating Live Handshake...`);
-        const handshakeRes = await axios.get('https://www.youtube.com/', { 
-            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36' },
-            timeout: 5000 
+        const handshakeRes = await proxyGet('https://www.youtube.com/', { 
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36' }
         });
         const setCookies = handshakeRes.headers['set-cookie'];
         if (setCookies) {
             sessionCookies += ' ' + setCookies.map(c => c.split(';')[0]).join('; ');
         }
     } catch (e) {
-        console.warn('Handshake failed, using default cookies');
+        console.warn('Handshake failed, using default cookies:', e.message);
     }
 
     const commonHeaders = {
@@ -256,15 +263,13 @@ const fetchYouTubeTranscriptFromPage = async (videoId) => {
     let transcriptText = '';
     let languageCode = 'en';
 
-    // 1. PRIME: InnerTube Android API (Bypasses PoToken and &exp=xpe block)
+    // 1. PRIME: InnerTube Android API — proxied in production
     if (captionTracks.length === 0) {
         try {
             console.log(`[Fusion] Phase 1: Android Signing...`);
             const payload = { videoId, context: { client: { clientName: 'ANDROID', clientVersion: '20.10.38' } } };
-            // InnerTube is an official Google API — direct POST works even from cloud IPs usually
-            const pRes = await axios.post('https://www.youtube.com/youtubei/v1/player', payload, { 
-                headers: { 'Content-Type': 'application/json' },
-                timeout: 15000
+            const pRes = await proxyPost('https://www.youtube.com/youtubei/v1/player', payload, { 
+                headers: { 'Content-Type': 'application/json' }
             });
             captionTracks = pRes.data.captions?.playerCaptionsTracklistRenderer?.captionTracks || [];
             console.log(`[Fusion] Phase 1 found ${captionTracks.length} tracks.`);
@@ -321,9 +326,9 @@ const fetchYouTubeTranscriptFromPage = async (videoId) => {
     }
 
     if (!captionTracks || captionTracks.length === 0) {
-        // Validation check for deleted/private videos or restricted profiles
+        // Validation check — proxied in production
         try {
-            const checkRes = await axios.get(`https://www.youtube.com/watch?v=${videoId}`, { headers: commonHeaders });
+            const checkRes = await proxyGet(`https://www.youtube.com/watch?v=${videoId}`, { headers: commonHeaders });
             const html = checkRes.data;
             const isUnavailable = html.includes('This video is unavailable') || 
                                 html.includes('This video is private') ||
@@ -352,12 +357,12 @@ const fetchYouTubeTranscriptFromPage = async (videoId) => {
     languageCode = track.languageCode;
     console.log(`[Fusion] Unlocking track: ${languageCode}`);
 
-    // Try multiple formats using the signed baseUrl
+    // Try multiple formats using the signed baseUrl — proxied in production
     const formats = ['&fmt=json3', '&fmt=3', ''];
     for (const f of formats) {
         try {
             const signedUrl = track.baseUrl + (track.baseUrl.includes('?') ? '' : '?') + f;
-            const res = await axios.get(signedUrl, { headers: { ...commonHeaders }, timeout: 20000 });
+            const res = await proxyGet(signedUrl, { headers: { ...commonHeaders } });
             let data = res.data;
 
             if (typeof data === 'string' && data.startsWith('{')) data = JSON.parse(data);
