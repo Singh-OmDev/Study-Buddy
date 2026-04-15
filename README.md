@@ -36,12 +36,6 @@ The project is structured as a monorepo with two main workspaces:
 
 ---
 
-## 🚀 Live Demo
-
-> *Coming soon — deploy to Vercel (client) & Railway/Render (server)*
-
----
-
 ## ✨ Features
 
 ### 🤖 AI-Powered Tools (`/ai-revision`)
