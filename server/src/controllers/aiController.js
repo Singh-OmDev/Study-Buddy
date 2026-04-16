@@ -461,4 +461,72 @@ const getYoutubeTranscript = async (req, res) => {
     }
 };
 
-export { generateContent, getHistory, getChatHistory, createSession, getAllSessions, getSessionById, deleteSession, getYoutubeTranscript };
+// YouTube Video Search — uses YouTube Data API v3
+const searchYouTube = async (req, res) => {
+    const { q } = req.query;
+    if (!q || !q.trim()) return res.status(400).json({ message: 'Search query is required' });
+
+    const apiKey = process.env.YOUTUBE_API_KEY;
+    if (!apiKey) return res.status(503).json({ message: 'YouTube search is not configured. Add YOUTUBE_API_KEY to server .env' });
+
+    try {
+        // 1. Search for videos
+        const searchRes = await axios.get('https://www.googleapis.com/youtube/v3/search', {
+            params: {
+                key: apiKey,
+                q: q.trim(),
+                part: 'snippet',
+                type: 'video',
+                maxResults: 6,
+                videoCaption: 'closedCaption', // only videos with subtitles
+                relevanceLanguage: 'en',
+                safeSearch: 'strict'
+            },
+            timeout: 10000
+        });
+
+        const items = searchRes.data.items || [];
+        if (items.length === 0) return res.json({ videos: [] });
+
+        // 2. Get durations for each video (separate API call)
+        const videoIds = items.map(i => i.id.videoId).join(',');
+        const detailRes = await axios.get('https://www.googleapis.com/youtube/v3/videos', {
+            params: { key: apiKey, id: videoIds, part: 'contentDetails' },
+            timeout: 10000
+        });
+
+        const durationMap = {};
+        (detailRes.data.items || []).forEach(v => {
+            // Convert ISO 8601 duration (PT1H2M3S) to readable format
+            const d = v.contentDetails.duration;
+            const hrs = d.match(/([0-9]+)H/)?.[1];
+            const mins = d.match(/([0-9]+)M/)?.[1];
+            const secs = d.match(/([0-9]+)S/)?.[1];
+            let readable = '';
+            if (hrs) readable += `${hrs}:`;
+            readable += `${(mins || '0').padStart(hrs ? 2 : 1, '0')}:`;
+            readable += (secs || '0').padStart(2, '0');
+            durationMap[v.id] = readable;
+        });
+
+        const videos = items.map(item => ({
+            videoId: item.id.videoId,
+            title: item.snippet.title,
+            channel: item.snippet.channelTitle,
+            description: item.snippet.description?.slice(0, 120) + '...',
+            thumbnail: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url,
+            publishedAt: item.snippet.publishedAt,
+            duration: durationMap[item.id.videoId] || ''
+        }));
+
+        res.json({ videos });
+    } catch (error) {
+        console.error('[YouTube Search] Error:', error.response?.data || error.message);
+        if (error.response?.status === 403) {
+            return res.status(403).json({ message: 'YouTube API quota exceeded or key invalid. Try again later.' });
+        }
+        res.status(500).json({ message: 'YouTube search failed. Please try again.' });
+    }
+};
+
+export { generateContent, getHistory, getChatHistory, createSession, getAllSessions, getSessionById, deleteSession, getYoutubeTranscript, searchYouTube };
