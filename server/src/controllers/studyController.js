@@ -200,8 +200,18 @@ const getStats = async (req, res) => {
         const nowTime = new Date().getTime();
         const dueForRevision = Object.values(latestLogsByTopic)
             .filter(log => log.revisionDueDate && new Date(log.revisionDueDate).getTime() <= nowTime)
-            .sort((a, b) => new Date(a.revisionDueDate) - new Date(b.revisionDueDate))
-            .slice(0, 5); // Limit to top 5 most overdue
+            .map(log => {
+                const ageInDays = Math.max(1, Math.floor((nowTime - new Date(log.date)) / (1000 * 60 * 60 * 24)));
+                const confidence = log.confidenceLevel || 3;
+                const weaknessScore = ageInDays * (6 - confidence);
+                return {
+                    ...log.toObject ? log.toObject() : log,
+                    ageInDays,
+                    weaknessScore: Math.round(weaknessScore)
+                };
+            })
+            .sort((a, b) => b.weaknessScore - a.weaknessScore) // Sort by most 'urgent' gap
+            .slice(0, 5); // Limit to top 5 most critical
 
         const responseData = {
             totalLogs: logs.length,

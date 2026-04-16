@@ -63,6 +63,7 @@ const Dashboard = () => {
         };
 
         fetchStats();
+        fetchGaps(); // Auto-load AI analyzer on mount
     }, [user, getToken, timeframe]);
 
     // Initialize Socket & Listeners
@@ -494,9 +495,20 @@ const Dashboard = () => {
                                     className="flex items-center justify-between p-3 bg-[#111] hover:bg-[#151515] rounded-xl border border-[#262626] hover:border-orange-500/30 transition-colors"
                                 >
                                     <div>
-                                        <h4 className="text-white font-medium text-sm">{log.topic}</h4>
-                                        <p className="text-zinc-500 text-xs flex items-center gap-1 mt-1">
-                                            <Book className="h-3 w-3" /> {log.subject}
+                                        <div className="flex items-center gap-2">
+                                            <h4 className="text-white font-medium text-sm">{log.topic}</h4>
+                                            {/* Smart Reasoning Badges */}
+                                            {log.confidenceLevel <= 2 && (
+                                                <span className="text-[10px] bg-red-500/10 text-red-500 border border-red-500/20 px-1.5 py-0.5 rounded uppercase font-bold">Needs Focus</span>
+                                            )}
+                                            {log.ageInDays >= 30 && (
+                                                <span className="text-[10px] bg-orange-500/10 text-orange-500 border border-orange-500/20 px-1.5 py-0.5 rounded uppercase font-bold">Time Decay</span>
+                                            )}
+                                        </div>
+                                        <p className="text-zinc-500 text-xs flex items-center gap-3 mt-1">
+                                            <span className="flex items-center gap-1"><Book className="h-3 w-3" /> {log.subject}</span>
+                                            <span className="flex items-center gap-1"><Brain className="h-3 w-3" /> Confidence: {log.confidenceLevel}/5</span>
+                                            <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {log.ageInDays}d ago</span>
                                         </p>
                                     </div>
                                     <div className="flex gap-1.5">
@@ -598,8 +610,25 @@ const Dashboard = () => {
                         ) : (
                             <Brain className="h-3 w-3" />
                         )}
-                        Analyze My Brain
+                        AI Power Refresh
                     </button>
+                </div>
+
+                {/* Secret Formula Explanation */}
+                <div className="mb-6 p-4 bg-purple-500/5 border border-purple-500/10 rounded-xl">
+                    <div className="flex items-start gap-3">
+                        <div className="p-2 bg-purple-500/10 rounded-lg">
+                            <Layers className="h-4 w-4 text-purple-400" />
+                        </div>
+                        <div>
+                            <p className="text-sm text-zinc-300 font-medium">How AI Picks your Subjects:</p>
+                            <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                                We use a <strong className="text-purple-400 italic">Decay Coefficient</strong> formula: 
+                                <span className="bg-black/40 px-2 py-0.5 rounded-md mx-1 font-mono">Priority = Days_Elapsed × (6 - Confidence)</span>.
+                                Older topics with lower confidence scores are flagged as <span className="text-red-400">Critical</span> first.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 <AnimatePresence>
