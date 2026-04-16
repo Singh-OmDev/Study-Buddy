@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, Brain, Calendar, BarChart2, Zap, Terminal, Sparkles, Clock, Github, Twitter, Linkedin, Instagram } from 'lucide-react';
+import { ArrowRight, BookOpen, Brain, Calendar, BarChart2, Zap, Terminal, Sparkles, Clock, Github, Twitter, Linkedin, Instagram, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 
@@ -21,9 +21,8 @@ const Landing = () => {
                         <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-500">learning journey</span>
                     </h1>
 
-                    <p className="max-w-2xl mx-auto text-lg md:text-xl text-zinc-500 mb-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 leading-relaxed">
-                        The all-in-one workspace for serious students. Log sessions, analyze progress,
-                        and chat with an AI that remembers everything you've ever studied.
+                    <p className="max-w-2xl mx-auto text-lg md:text-xl text-zinc-500 mb-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 leading-relaxed font-medium">
+                        Your AI study partner. Search YouTube for instant notes, map your knowledge gaps, and join live study rooms with friends. Mastery made simple.
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300">
@@ -68,51 +67,51 @@ const Landing = () => {
                 <h2 className="text-sm font-mono text-zinc-500 uppercase tracking-widest mb-10 text-center">System Capabilities</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Feature 1: Logger */}
+                    {/* Feature 1: YouTube AI */}
                     <div className="bento-card p-8 md:col-span-2 relative overflow-hidden group hover:border-zinc-600 transition-colors">
                         <div className="relative z-10">
                             <div className="w-14 h-14 bg-[#1a1a1a] rounded-xl flex items-center justify-center mb-6 border border-[#262626] group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                                <BookOpen className="h-7 w-7 text-white" />
+                                <Zap className="h-7 w-7 text-white" />
                             </div>
-                            <h3 className="text-3xl font-extrabold text-white mb-3 tracking-tight">Smart Logging</h3>
+                            <h3 className="text-3xl font-extrabold text-white mb-3 tracking-tight">YouTube AI Engine</h3>
                             <p className="text-zinc-400 text-lg max-w-lg leading-relaxed">
-                                Track <span className="text-white font-semibold">understanding</span>, not just time. Our structured logger captures your confidence levels, building a true map of your knowledge.
+                                Search for any lecture directly. Instantly generate <span className="text-white font-semibold">Summaries, Flashcards, and Quizzes</span> from YouTube to build instant mastery.
                             </p>
                         </div>
                         <div className="absolute right-0 bottom-0 w-1/3 h-full bg-gradient-to-l from-[#1a1a1a] to-transparent opacity-50 group-hover:opacity-30 transition-opacity"></div>
                     </div>
 
-                    {/* Feature 2: Analytics */}
-                    <div className="bento-card p-8 flex flex-col relative overflow-hidden group hover:border-zinc-600 transition-colors">
-                        <div className="w-12 h-12 bg-[#1a1a1a] rounded-lg flex items-center justify-center mb-4 border border-[#262626] group-hover:rotate-6 transition-transform duration-300">
-                            <BarChart2 className="h-6 w-6 text-white" />
-                        </div>
-                        <h3 className="text-xl font-bold text-white mb-2">Metrics</h3>
-                        <p className="text-zinc-400 text-sm leading-relaxed">
-                            Visualize subject mastery and streaks on a Linear-style dashboard.
-                        </p>
-                    </div>
-
-                    {/* Feature 3: AI Chat */}
+                    {/* Feature 2: Brain Analyzer */}
                     <div className="bento-card p-8 flex flex-col relative overflow-hidden group hover:border-zinc-600 transition-colors">
                         <div className="w-12 h-12 bg-[#1a1a1a] rounded-lg flex items-center justify-center mb-4 border border-[#262626] group-hover:scale-110 transition-transform duration-300">
                             <Brain className="h-6 w-6 text-white" />
                         </div>
-                        <h3 className="text-xl font-bold text-white mb-2">RAG AI Tutor</h3>
+                        <h3 className="text-xl font-bold text-white mb-2">Brain Gap Mapping</h3>
                         <p className="text-zinc-400 text-sm leading-relaxed">
-                            "What did I study last week?" Chat with an AI that knows your entire history.
+                            Visualizing what you've forgotten before it happens. AI-driven decay logic tracks your brain's weaknesses.
                         </p>
                     </div>
 
-                    {/* Feature 4: Tools */}
+                    {/* Feature 3: Study Pods */}
+                    <div className="bento-card p-8 flex flex-col relative overflow-hidden group hover:border-zinc-600 transition-colors">
+                        <div className="w-12 h-12 bg-[#1a1a1a] rounded-lg flex items-center justify-center mb-4 border border-[#262626] group-hover:scale-110 transition-transform duration-300">
+                            <Users className="h-6 w-6 text-white" />
+                        </div>
+                        <h3 className="text-xl font-bold text-white mb-2">Collaborative Pods</h3>
+                        <p className="text-zinc-400 text-sm leading-relaxed">
+                            P2P Video rooms with shared whiteboards. Study with buddies or our AI "Agent Stark."
+                        </p>
+                    </div>
+
+                    {/* Feature 4: Memory System */}
                     <div className="bento-card p-8 md:col-span-2 relative overflow-hidden group hover:border-zinc-600 transition-colors">
                         <div className="relative z-10">
                             <div className="w-14 h-14 bg-[#1a1a1a] rounded-xl flex items-center justify-center mb-6 border border-[#262626] group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                                <Terminal className="h-7 w-7 text-white" />
+                                <Sparkles className="h-7 w-7 text-white" />
                             </div>
-                            <h3 className="text-3xl font-extrabold text-white mb-3 tracking-tight">Active Recall Tools</h3>
+                            <h3 className="text-3xl font-extrabold text-white mb-3 tracking-tight">Personal RAG Memory</h3>
                             <p className="text-zinc-400 text-lg max-w-lg leading-relaxed">
-                                Turn notes into power. Instantly generate summaries and quizzes from raw text using advanced LLMs.
+                                Our AI Tutor doesn't just guess—it recalls your entire study history through <span className="text-white font-semibold">Semantic Vector Search</span>.
                             </p>
                         </div>
                     </div>
@@ -136,9 +135,9 @@ const Landing = () => {
                         </p>
                         <div className="space-y-4">
                             {[
-                                "Scattered notes across completely different apps",
-                                "No idea which subjects are falling behind",
-                                "Studying inefficiently without focus tools"
+                                "Manual notes scattered across different notebook apps",
+                                "No idea which subjects are decaying in memory",
+                                "Studying without active recall or scientific spacing"
                             ].map((item, i) => (
                                 <div key={i} className="flex items-center gap-3 text-zinc-500">
                                     <div className="min-w-[6px] h-[6px] bg-zinc-700 rounded-full" />
@@ -161,9 +160,9 @@ const Landing = () => {
                         <h3 className="text-2xl font-bold text-white mb-8">The Intelligent Way</h3>
                         <ul className="space-y-6">
                             {[
-                                { text: "AI instantly analyzes your knowledge gaps", icon: Brain },
-                                { text: "Visual dashboards keep you accountable", icon: BarChart2 },
-                                { text: "Focus modes maximize deep work blocks", icon: Zap }
+                                { text: "AI predicts your knowledge gaps automatically", icon: Brain },
+                                { text: "Search and Study any YouTube lecture with AI", icon: Zap },
+                                { text: "P2P Rooms for real-time peer collaboration", icon: Users }
                             ].map((item, i) => (
                                 <li key={i} className="flex items-start gap-4 text-zinc-200">
                                     <div className="p-2 rounded-lg bg-[#1a1a1a] border border-[#262626] text-green-500">
@@ -183,10 +182,10 @@ const Landing = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         {[
-                            { step: '01', title: 'Log Session', desc: 'Enter subject, topic, and duration.', icon: BookOpen },
-                            { step: '02', title: 'AI Analysis', desc: 'Auto-summarize notes & confidence.', icon: Sparkles },
-                            { step: '03', title: 'Track Data', desc: 'View analytics & streaks.', icon: BarChart2 },
-                            { step: '04', title: 'Review', desc: 'Chat with history to revise.', icon: Brain },
+                            { step: '01', title: 'Discover', desc: 'Search YouTube for lectures or log notes.', icon: Zap },
+                            { step: '02', title: 'Extract', desc: 'AI generates quizzes & flashcards.', icon: Sparkles },
+                            { step: '03', title: 'Collaborate', desc: 'Join study pods & share whiteboards.', icon: Users },
+                            { step: '04', title: 'Analyze', desc: 'AI identifies gaps & prompts revision.', icon: Brain },
                         ].map((item, idx) => (
                             <div key={idx} className="bento-card p-6 relative group hover:bg-[#151515] transition-colors">
                                 <div className="absolute top-4 right-4 text-4xl font-bold text-[#1f1f1f] group-hover:text-[#2a2a2a] transition-colors select-none font-mono">

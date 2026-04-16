@@ -6,52 +6,52 @@ import { Link } from 'react-router-dom';
 const Features = () => {
     const features = [
         {
-            icon: BookOpen,
-            title: "Smart Logging System",
-            description: "Go beyond simple time tracking. Log your confidence levels, notes, and mood to build a comprehensive map of your knowledge.",
-            color: "text-blue-500",
-            bg: "bg-blue-500/10",
-            border: "border-blue-500/20"
+            icon: Zap,
+            title: "YouTube AI Study Tool",
+            description: "Master lectures in minutes. Search for specific topics directly and instantly convert any video into structured notes, flashcards, and quizzes.",
+            color: "text-orange-500",
+            bg: "bg-orange-500/10",
+            border: "border-orange-500/20"
         },
         {
             icon: Brain,
-            title: "RAG AI Tutor",
-            description: "Chat with an AI that remembers everything you've ever studied. Ask questions based on your own past notes and sessions.",
+            title: "AI Brain Gap Mapping",
+            description: "Stop guessing what to study. Our AI analyzes your history to visualize knowledge decay and identify gaps before they become failures.",
             color: "text-purple-500",
             bg: "bg-purple-500/10",
             border: "border-purple-500/20"
         },
         {
-            icon: BarChart2,
-            title: "Analytics Dashboard",
-            description: "Visualize your progress with linear-style graphs. Track your study streaks, subject distribution, and focus hours.",
+            icon: Share2,
+            title: "Collaborative Study Pods",
+            description: "Real-time P2P rooms with video chat and shared whiteboards. Study together with peer-matching or our AI fallback assistant.",
+            color: "text-blue-500",
+            bg: "bg-blue-500/10",
+            border: "border-blue-500/20"
+        },
+        {
+            icon: Terminal,
+            title: "Personal RAG Tutor",
+            description: "Chat with an AI that genuinely knows you. Using Semantic Vector Search, Agent Stark recalls every session you've ever logged.",
             color: "text-green-500",
             bg: "bg-green-500/10",
             border: "border-green-500/20"
         },
         {
-            icon: Zap,
-            title: "Focus Mode",
-            description: "Eliminate distractions with our built-in Pomodoro timer and blocking tools. Deep work made easy.",
-            color: "text-yellow-500",
-            bg: "bg-yellow-500/10",
-            border: "border-yellow-500/20"
-        },
-        {
-            icon: Terminal,
-            title: "Active Recall Generator",
-            description: "Instantly turn your notes into quizzes and flashcards. The most effective way to learn, automated.",
+            icon: BookOpen,
+            title: "Active Recall Engine",
+            description: "Instantly turn raw notes or transcripts into interactive cards. Scientific spaced repetition ensures you retain information forever.",
             color: "text-red-500",
             bg: "bg-red-500/10",
             border: "border-red-500/20"
         },
         {
-            icon: Share2,
-            title: "Social Accountability",
-            description: "Share your progress with friends. Compete on leaderboards or just keep each other motivated.",
-            color: "text-pink-500",
-            bg: "bg-pink-500/10",
-            border: "border-pink-500/20"
+            icon: Globe,
+            title: "Zen Audio Hub",
+            description: "Eliminate distractions with a minimalist focus interface. Integrated Lofi streams and environmental audio for deep work.",
+            color: "text-zinc-400",
+            bg: "bg-zinc-400/10",
+            border: "border-zinc-400/20"
         }
     ];
 
