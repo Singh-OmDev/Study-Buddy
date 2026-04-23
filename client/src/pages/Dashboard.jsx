@@ -164,6 +164,7 @@ const Dashboard = () => {
             setStats(prev => ({
                 ...prev,
                 recentLogs: prev.recentLogs.filter(log => log._id !== id),
+                dueForRevision: prev.dueForRevision?.filter(log => log._id !== id),
                 totalLogs: prev.totalLogs - 1
             }));
         } catch (error) {
@@ -476,7 +477,7 @@ const Dashboard = () => {
                     <h3 className="text-orange-500 text-xs tracking-widest uppercase font-bold mb-4 flex items-center gap-2">
                         <Zap className="h-4 w-4" /> Up Next For Revision
                     </h3>
-                    <div className="space-y-4">
+                    <div className="space-y-4 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700 pr-2">
                         {!stats?.dueForRevision || stats?.dueForRevision?.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-6 text-center">
                                 <div className="h-12 w-12 bg-green-500/10 rounded-full flex items-center justify-center mb-3">
@@ -508,7 +509,7 @@ const Dashboard = () => {
                                         <p className="text-zinc-500 text-xs flex items-center gap-3 mt-1">
                                             <span className="flex items-center gap-1"><Book className="h-3 w-3" /> {log.subject}</span>
                                             <span className="flex items-center gap-1"><Brain className="h-3 w-3" /> Confidence: {log.confidenceLevel}/5</span>
-                                            <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {log.ageInDays}d ago</span>
+                                            <span className="flex items-center gap-1 text-orange-400"><Clock className="h-3 w-3" /> Due: {new Date(log.revisionDueDate).toLocaleDateString()} ({log.ageInDays}d ago)</span>
                                         </p>
                                     </div>
                                     <div className="flex gap-1.5">
@@ -531,6 +532,13 @@ const Dashboard = () => {
                                         >
                                             <Users className="h-3 w-3" /> Mentor
                                         </button>
+                                        <button
+                                            onClick={() => handleDelete(log._id)}
+                                            className="px-2.5 py-1.5 text-zinc-500 hover:bg-red-500/10 hover:text-red-500 text-xs font-bold rounded-lg transition-colors"
+                                            title="Delete Log"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
                                     </div>
                                 </motion.div>
                             ))
@@ -541,7 +549,7 @@ const Dashboard = () => {
                 {/* Recent Logs List */}
                 <div className="bento-card p-6">
                     <h3 className="text-zinc-500 text-xs tracking-widest uppercase font-bold mb-4">Recent Activity</h3>
-                    <div className="space-y-4">
+                    <div className="space-y-4 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700 pr-2">
                         {stats?.recentLogs?.length === 0 ? (
                             <p className="text-zinc-500 text-sm py-4">No recent activity. Start logging your focus sessions!</p>
                         ) : (
@@ -560,6 +568,9 @@ const Dashboard = () => {
                                                 <span className="text-xs text-zinc-500 flex items-center gap-1">
                                                     <Clock className="h-3 w-3" />
                                                     {new Date(log.date).toLocaleDateString()}
+                                                </span>
+                                                <span className="text-[10px] text-orange-500 bg-orange-500/10 px-2 rounded flex items-center gap-1">
+                                                    Next: {new Date(log.revisionDueDate).toLocaleDateString()}
                                                 </span>
                                                 {log.confidenceLevel >= 4 && (
                                                     <span className="text-xs text-green-500 bg-green-500/10 px-2 rounded">High Confidence</span>

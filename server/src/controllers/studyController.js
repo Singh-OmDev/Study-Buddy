@@ -186,7 +186,7 @@ const getStats = async (req, res) => {
         }, {});
 
         // Recent logs strictly bounded by the timeframe
-        const recentLogs = logs.slice(-5).reverse();
+        const recentLogs = logs.slice(-20).reverse();
 
         // Calculate "Due for Revision" using ALL logs
         const latestLogsByTopic = {};
@@ -211,7 +211,7 @@ const getStats = async (req, res) => {
                 };
             })
             .sort((a, b) => b.weaknessScore - a.weaknessScore) // Sort by most 'urgent' gap
-            .slice(0, 5); // Limit to top 5 most critical
+            .slice(0, 20); // Limit to top 20 most critical
 
         const responseData = {
             totalLogs: logs.length,
